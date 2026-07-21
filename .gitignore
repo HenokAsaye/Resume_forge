@@ -25,6 +25,9 @@ out/
 *.swp
 *.swo
 
+# Project docs
+docs/opencode.txt
+
 # OS
 .DS_Store
 Thumbs.db
