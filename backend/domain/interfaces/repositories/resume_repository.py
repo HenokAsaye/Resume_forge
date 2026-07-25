@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 from domain.entities.resume import Resume, ResumeVersion
 
@@ -10,7 +9,7 @@ class ResumeRepository(ABC):
         pass
 
     @abstractmethod
-    async def get_by_id(self, resume_id: str) -> Optional[Resume]:
+    async def get_by_id(self, resume_id: str) -> Resume | None:
         pass
 
     @abstractmethod
