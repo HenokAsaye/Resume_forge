@@ -23,7 +23,7 @@ const eslintConfig = defineConfig([
     },
     rules: {
       "boundaries/dependencies": [
-        "warn",
+        "error",
         {
           default: "disallow",
           policies: [
