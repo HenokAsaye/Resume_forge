@@ -1,5 +1,3 @@
-from typing import Optional
-
 from supabase import Client
 
 from domain.entities.resume import Resume, ResumeVersion
@@ -11,16 +9,18 @@ class SupabaseResumeRepository(ResumeRepository):
         self._client = client
 
     async def create(self, resume: Resume) -> Resume:
-        self._client.table("resumes").insert({
-            "id": resume.id,
-            "user_id": resume.user_id,
-            "name": resume.name,
-            "original_file_url": resume.original_file_url,
-            "created_at": resume.created_at.isoformat(),
-        }).execute()
+        self._client.table("resumes").insert(
+            {
+                "id": resume.id,
+                "user_id": resume.user_id,
+                "name": resume.name,
+                "original_file_url": resume.original_file_url,
+                "created_at": resume.created_at.isoformat(),
+            }
+        ).execute()
         return resume
 
-    async def get_by_id(self, resume_id: str) -> Optional[Resume]:
+    async def get_by_id(self, resume_id: str) -> Resume | None:
         result = self._client.table("resumes").select("*").eq("id", resume_id).execute()
         if not result.data:
             return None
@@ -37,14 +37,16 @@ class SupabaseResumeRepository(ResumeRepository):
         return [Resume(**row) for row in result.data]
 
     async def create_version(self, version: ResumeVersion) -> ResumeVersion:
-        self._client.table("resume_versions").insert({
-            "id": version.id,
-            "resume_id": version.resume_id,
-            "version_number": version.version_number,
-            "optimized_json": version.optimized_json,
-            "diff_json": version.diff_json,
-            "created_at": version.created_at.isoformat(),
-        }).execute()
+        self._client.table("resume_versions").insert(
+            {
+                "id": version.id,
+                "resume_id": version.resume_id,
+                "version_number": version.version_number,
+                "optimized_json": version.optimized_json,
+                "diff_json": version.diff_json,
+                "created_at": version.created_at.isoformat(),
+            }
+        ).execute()
         return version
 
     async def get_versions(self, resume_id: str) -> list[ResumeVersion]:
