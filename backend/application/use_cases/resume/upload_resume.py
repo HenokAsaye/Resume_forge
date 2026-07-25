@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 
 from domain.entities.resume import Resume
 from domain.interfaces.repositories.resume_repository import ResumeRepository
@@ -26,6 +26,6 @@ class UploadResumeUseCase:
             user_id=user_id,
             name=file_name,
             original_file_url=file_url,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(UTC),
         )
         return await self._resume_repo.create(resume)
