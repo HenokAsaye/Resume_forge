@@ -35,6 +35,28 @@ export const api = {
     return handleResponse<T>(response)
   },
 
+  async patch<T>(path: string, body?: unknown): Promise<T> {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: "PATCH",
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    })
+    return handleResponse<T>(response)
+  },
+
+  async remove<T>(path: string): Promise<T> {
+    const headers = await getAuthHeaders()
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: "DELETE",
+      headers,
+    })
+    if (response.status === 204) {
+      return undefined as T
+    }
+    return handleResponse<T>(response)
+  },
+
   async upload<T>(path: string, formData: FormData): Promise<T> {
     const headers = await getAuthHeaders()
     delete headers["Content-Type"]
