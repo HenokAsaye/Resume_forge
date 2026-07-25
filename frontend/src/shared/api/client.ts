@@ -1,7 +1,7 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
 
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  const { supabase } = await import("./supabase")
+  const { supabase } = await import("@/shared/lib/supabase")
   const { data: { session } } = await supabase.auth.getSession()
   const headers: Record<string, string> = { "Content-Type": "application/json" }
   if (session?.access_token) {
