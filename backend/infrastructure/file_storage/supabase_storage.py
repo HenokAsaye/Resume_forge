@@ -1,5 +1,3 @@
-from typing import Optional
-
 from supabase import Client
 
 from domain.interfaces.services.file_storage_service import FileStorageService
@@ -10,13 +8,13 @@ class SupabaseStorageService(FileStorageService):
         self._client = client
 
     async def upload(self, bucket: str, path: str, content: bytes) -> str:
-        result = self._client.storage.from_(bucket).upload(
+        self._client.storage.from_(bucket).upload(
             path, content, {"content-type": "application/octet-stream"}
         )
         public_url = self._client.storage.from_(bucket).get_public_url(path)
         return public_url
 
-    async def download(self, bucket: str, path: str) -> Optional[bytes]:
+    async def download(self, bucket: str, path: str) -> bytes | None:
         result = self._client.storage.from_(bucket).download(path)
         return result
 
