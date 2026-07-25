@@ -1,8 +1,8 @@
 "use client"
 
-import { usePing } from "@/hooks/use-ping"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { usePing } from "@/shared/hooks/use-ping"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Button } from "@/shared/ui/button"
 import { RefreshCw, CheckCircle2, XCircle, Loader2 } from "lucide-react"
 
 export default function Home() {
