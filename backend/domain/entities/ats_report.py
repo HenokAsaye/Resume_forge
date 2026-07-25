@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 
 @dataclass
@@ -9,8 +8,8 @@ class ATSReport:
     resume_id: str
     job_id: str
     match_score: float
-    missing_keywords: Optional[list[str]] = None
-    suggestions: Optional[list[str]] = None
-    strengths: Optional[list[str]] = None
-    weaknesses: Optional[list[str]] = None
+    missing_keywords: list[str] | None = None
+    suggestions: list[str] | None = None
+    strengths: list[str] | None = None
+    weaknesses: list[str] | None = None
     created_at: datetime = field(default_factory=datetime.utcnow)
