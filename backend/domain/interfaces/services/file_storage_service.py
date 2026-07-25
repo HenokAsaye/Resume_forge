@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional
 
 
 class FileStorageService(ABC):
@@ -8,7 +7,7 @@ class FileStorageService(ABC):
         pass
 
     @abstractmethod
-    async def download(self, bucket: str, path: str) -> Optional[bytes]:
+    async def download(self, bucket: str, path: str) -> bytes | None:
         pass
 
     @abstractmethod
