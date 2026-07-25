@@ -1,19 +1,18 @@
-import uuid
-from datetime import datetime
-
-from domain.entities.user import User
-from domain.interfaces.repositories.user_repository import UserRepository
+from domain.interfaces.services.auth_service import AuthenticationResult, AuthService
 
 
 class RegisterUserUseCase:
-    def __init__(self, user_repo: UserRepository):
-        self._user_repo = user_repo
+    def __init__(self, auth_service: AuthService):
+        self._auth_service = auth_service
 
-    async def execute(self, email: str, name: str, supabase_uid: str) -> User:
-        user = User(
-            id=supabase_uid,
+    async def execute(
+        self,
+        email: str,
+        password: str,
+        name: str,
+    ) -> AuthenticationResult:
+        return await self._auth_service.register(
             email=email,
+            password=password,
             name=name,
-            created_at=datetime.utcnow(),
         )
-        return await self._user_repo.create(user)
