@@ -1,6 +1,8 @@
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from domain.entities.resume import ResumeMimeType
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -32,6 +34,18 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_model: str = "gpt-4o"
 
+    resume_storage_bucket: str = "resumes"
+    resume_max_file_size_bytes: int = Field(default=6 * 1024 * 1024, gt=0)
+    resume_max_uncompressed_size_bytes: int = Field(
+        default=50 * 1024 * 1024,
+        gt=0,
+    )
+    resume_allowed_extensions: str = ".pdf,.docx"
+    resume_allowed_mime_types: str = (
+        "application/pdf,"
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    )
+
     cors_origins: str = "http://localhost:3000"
 
     @property
@@ -39,6 +53,27 @@ class Settings(BaseSettings):
         return [
             origin.strip() for origin in self.cors_origins.split(",") if origin.strip()
         ]
+
+    @property
+    def resume_allowed_extension_set(self) -> frozenset[str]:
+        return frozenset(
+            self._normalize_extension(extension)
+            for extension in self.resume_allowed_extensions.split(",")
+            if extension.strip()
+        )
+
+    @property
+    def resume_allowed_mime_type_set(self) -> frozenset[ResumeMimeType]:
+        return frozenset(
+            ResumeMimeType(mime_type.strip().lower())
+            for mime_type in self.resume_allowed_mime_types.split(",")
+            if mime_type.strip()
+        )
+
+    @staticmethod
+    def _normalize_extension(extension: str) -> str:
+        normalized = extension.strip().lower()
+        return normalized if normalized.startswith(".") else f".{normalized}"
 
 
 def get_settings() -> Settings:
