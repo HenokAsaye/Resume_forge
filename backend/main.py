@@ -4,8 +4,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
+from interfaces.api.exception_handlers import register_exception_handlers
 from interfaces.api.v1.auth import router as auth_router
 from interfaces.api.v1.health import router as health_router
+from interfaces.api.v1.resumes import router as resumes_router
 
 API_DESCRIPTION = """
 ResumeAI helps users upload, parse, analyze, and optimize resumes against job
@@ -30,6 +32,10 @@ OPENAPI_TAGS = [
     {
         "name": "auth",
         "description": "Supabase-backed registration, login, refresh, and user identity.",
+    },
+    {
+        "name": "resumes",
+        "description": "Private resume upload, retrieval, download, and deletion.",
     },
 ]
 
@@ -68,6 +74,8 @@ def create_app() -> FastAPI:
 
     app.include_router(health_router)
     app.include_router(auth_router)
+    app.include_router(resumes_router)
+    register_exception_handlers(app)
 
     return app
 
