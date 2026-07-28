@@ -5,8 +5,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
 from interfaces.api.exception_handlers import register_exception_handlers
+from interfaces.api.v1.ats import router as ats_router
 from interfaces.api.v1.auth import router as auth_router
+from interfaces.api.v1.cover_letters import router as cover_letters_router
 from interfaces.api.v1.health import router as health_router
+from interfaces.api.v1.jobs import router as jobs_router
 from interfaces.api.v1.resumes import router as resumes_router
 
 API_DESCRIPTION = """
@@ -35,7 +38,23 @@ OPENAPI_TAGS = [
     },
     {
         "name": "resumes",
-        "description": "Private resume upload, retrieval, download, and deletion.",
+        "description": "Private resume upload, parsing, retrieval, and deletion.",
+    },
+    {
+        "name": "jobs",
+        "description": "Owner-scoped job descriptions and AI structuring.",
+    },
+    {
+        "name": "ats",
+        "description": "Persisted resume-to-job matching reports.",
+    },
+    {
+        "name": "optimization",
+        "description": "Resume optimization, version history, and generated exports.",
+    },
+    {
+        "name": "cover-letters",
+        "description": "AI-generated, editable, owner-scoped cover letters.",
     },
 ]
 
@@ -75,6 +94,9 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(auth_router)
     app.include_router(resumes_router)
+    app.include_router(jobs_router)
+    app.include_router(ats_router)
+    app.include_router(cover_letters_router)
     register_exception_handlers(app)
 
     return app

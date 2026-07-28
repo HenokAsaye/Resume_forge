@@ -1,28 +1,85 @@
 from collections.abc import AsyncIterator
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Header, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from supabase import AsyncClient, Client
 
+from application.exceptions import AIConfigurationError
+from application.interfaces.services.career_ai_services import (
+    ATSAnalysisService,
+    CoverLetterGenerationService,
+    JobParsingService,
+    ResumeOptimizationService,
+)
+from application.interfaces.services.document_text_extraction_service import (
+    DocumentTextExtractionService,
+)
 from application.interfaces.services.file_storage_service import FileStorageService
 from application.interfaces.services.file_validation_service import (
     FileValidationPolicy,
     FileValidationService,
 )
+from application.interfaces.services.resume_export_service import ResumeExportService
+from application.interfaces.services.resume_parsing_service import ResumeParsingService
+from application.use_cases.ats import (
+    AnalyzeATSUseCase,
+    GetATSReportUseCase,
+    ListATSReportsUseCase,
+)
+from application.use_cases.cover_letters import (
+    CreateCoverLetterUseCase,
+    DeleteCoverLetterUseCase,
+    GetCoverLetterUseCase,
+    ListCoverLettersUseCase,
+    UpdateCoverLetterUseCase,
+)
+from application.use_cases.jobs import (
+    CreateJobUseCase,
+    DeleteJobUseCase,
+    GetJobUseCase,
+    ListJobsUseCase,
+    ParseJobUseCase,
+)
 from application.use_cases.resume import (
     DeleteResumeUseCase,
     DownloadResumeUseCase,
+    ExportResumeUseCase,
     GetResumeUseCase,
+    GetResumeVersionUseCase,
     ListResumesUseCase,
+    ListResumeVersionsUseCase,
+    OptimizeResumeUseCase,
+    ParseResumeUseCase,
     UploadResumeUseCase,
 )
 from config import Settings, get_settings
 from domain.exceptions import AuthenticationError
+from domain.interfaces.repositories.ats_report_repository import ATSReportRepository
+from domain.interfaces.repositories.cover_letter_repository import (
+    CoverLetterRepository,
+)
+from domain.interfaces.repositories.job_repository import JobRepository
 from domain.interfaces.repositories.resume_repository import ResumeRepository
 from domain.interfaces.repositories.user_repository import UserRepository
 from domain.interfaces.services.auth_service import AuthenticatedUser, AuthService
+from infrastructure.ai import (
+    OpenAIATSAnalysisService,
+    OpenAICoverLetterGenerationService,
+    OpenAIJobParsingService,
+    OpenAIResumeOptimizationService,
+    OpenAIResumeParsingService,
+)
 from infrastructure.auth.supabase_auth_service import SupabaseAuthService
+from infrastructure.database.repositories.supabase_ats_report_repository import (
+    SupabaseATSReportRepository,
+)
+from infrastructure.database.repositories.supabase_cover_letter_repository import (
+    SupabaseCoverLetterRepository,
+)
+from infrastructure.database.repositories.supabase_job_repository import (
+    SupabaseJobRepository,
+)
 from infrastructure.database.repositories.supabase_resume_repository import (
     SupabaseResumeRepository,
 )
@@ -33,10 +90,12 @@ from infrastructure.database.supabase_client import (
     create_async_supabase_client,
     create_supabase_client,
 )
+from infrastructure.document_export import ResumeDocumentExportService
 from infrastructure.file_storage.supabase_storage import SupabaseStorageService
 from infrastructure.file_validation.resume_file_validator import (
     ResumeFileValidationService,
 )
+from infrastructure.text_extraction import ResumeTextExtractionService
 
 security = HTTPBearer(auto_error=False)
 
@@ -92,6 +151,33 @@ def get_resume_repo(
     return SupabaseResumeRepository(client)
 
 
+def get_job_repo(
+    client: Annotated[
+        AsyncClient,
+        Depends(get_authenticated_async_supabase_client),
+    ],
+) -> JobRepository:
+    return SupabaseJobRepository(client)
+
+
+def get_ats_report_repo(
+    client: Annotated[
+        AsyncClient,
+        Depends(get_authenticated_async_supabase_client),
+    ],
+) -> ATSReportRepository:
+    return SupabaseATSReportRepository(client)
+
+
+def get_cover_letter_repo(
+    client: Annotated[
+        AsyncClient,
+        Depends(get_authenticated_async_supabase_client),
+    ],
+) -> CoverLetterRepository:
+    return SupabaseCoverLetterRepository(client)
+
+
 def get_storage_service(
     client: Annotated[
         AsyncClient,
@@ -116,6 +202,64 @@ def get_file_validation_service(
     policy: Annotated[FileValidationPolicy, Depends(get_file_validation_policy)],
 ) -> FileValidationService:
     return ResumeFileValidationService(policy)
+
+
+def get_ai_api_key(
+    settings: Annotated[Settings, Depends(get_settings)],
+    request_api_key: Annotated[
+        str | None,
+        Header(alias="X-OpenAI-API-Key"),
+    ] = None,
+) -> str:
+    api_key = (request_api_key or settings.openai_api_key).strip()
+    if not api_key:
+        raise AIConfigurationError(
+            "OpenAI is not configured; provide X-OpenAI-API-Key or set OPENAI_API_KEY"
+        )
+    return api_key
+
+
+def get_resume_parsing_service(
+    api_key: Annotated[str, Depends(get_ai_api_key)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> ResumeParsingService:
+    return OpenAIResumeParsingService(api_key, settings.openai_model)
+
+
+def get_job_parsing_service(
+    api_key: Annotated[str, Depends(get_ai_api_key)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> JobParsingService:
+    return OpenAIJobParsingService(api_key, settings.openai_model)
+
+
+def get_ats_analysis_service(
+    api_key: Annotated[str, Depends(get_ai_api_key)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> ATSAnalysisService:
+    return OpenAIATSAnalysisService(api_key, settings.openai_model)
+
+
+def get_resume_optimization_service(
+    api_key: Annotated[str, Depends(get_ai_api_key)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> ResumeOptimizationService:
+    return OpenAIResumeOptimizationService(api_key, settings.openai_model)
+
+
+def get_cover_letter_generation_service(
+    api_key: Annotated[str, Depends(get_ai_api_key)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> CoverLetterGenerationService:
+    return OpenAICoverLetterGenerationService(api_key, settings.openai_model)
+
+
+def get_text_extraction_service() -> DocumentTextExtractionService:
+    return ResumeTextExtractionService()
+
+
+def get_resume_export_service() -> ResumeExportService:
+    return ResumeDocumentExportService()
 
 
 def get_upload_resume_use_case(
@@ -159,6 +303,173 @@ def get_delete_resume_use_case(
     storage: Annotated[FileStorageService, Depends(get_storage_service)],
 ) -> DeleteResumeUseCase:
     return DeleteResumeUseCase(resume_repo, storage)
+
+
+def get_parse_resume_use_case(
+    resume_repo: Annotated[ResumeRepository, Depends(get_resume_repo)],
+    storage: Annotated[FileStorageService, Depends(get_storage_service)],
+    extractor: Annotated[
+        DocumentTextExtractionService,
+        Depends(get_text_extraction_service),
+    ],
+    parser: Annotated[ResumeParsingService, Depends(get_resume_parsing_service)],
+) -> ParseResumeUseCase:
+    return ParseResumeUseCase(resume_repo, storage, extractor, parser)
+
+
+def get_list_resume_versions_use_case(
+    resume_repo: Annotated[ResumeRepository, Depends(get_resume_repo)],
+) -> ListResumeVersionsUseCase:
+    return ListResumeVersionsUseCase(resume_repo)
+
+
+def get_resume_version_use_case(
+    resume_repo: Annotated[ResumeRepository, Depends(get_resume_repo)],
+) -> GetResumeVersionUseCase:
+    return GetResumeVersionUseCase(resume_repo)
+
+
+def get_export_resume_use_case(
+    resume_repo: Annotated[ResumeRepository, Depends(get_resume_repo)],
+    exporter: Annotated[
+        ResumeExportService,
+        Depends(get_resume_export_service),
+    ],
+) -> ExportResumeUseCase:
+    return ExportResumeUseCase(resume_repo, exporter)
+
+
+def get_optimize_resume_use_case(
+    resume_repo: Annotated[ResumeRepository, Depends(get_resume_repo)],
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+    ats_repo: Annotated[ATSReportRepository, Depends(get_ats_report_repo)],
+    ats_service: Annotated[
+        ATSAnalysisService,
+        Depends(get_ats_analysis_service),
+    ],
+    optimization_service: Annotated[
+        ResumeOptimizationService,
+        Depends(get_resume_optimization_service),
+    ],
+) -> OptimizeResumeUseCase:
+    return OptimizeResumeUseCase(
+        resume_repo,
+        job_repo,
+        ats_repo,
+        ats_service,
+        optimization_service,
+    )
+
+
+def get_create_job_use_case(
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+) -> CreateJobUseCase:
+    return CreateJobUseCase(job_repo)
+
+
+def get_list_jobs_use_case(
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+) -> ListJobsUseCase:
+    return ListJobsUseCase(job_repo)
+
+
+def get_job_use_case(
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+) -> GetJobUseCase:
+    return GetJobUseCase(job_repo)
+
+
+def get_delete_job_use_case(
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+) -> DeleteJobUseCase:
+    return DeleteJobUseCase(job_repo)
+
+
+def get_parse_job_use_case(
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+    parser: Annotated[JobParsingService, Depends(get_job_parsing_service)],
+) -> ParseJobUseCase:
+    return ParseJobUseCase(job_repo, parser)
+
+
+def get_analyze_ats_use_case(
+    resume_repo: Annotated[ResumeRepository, Depends(get_resume_repo)],
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+    ats_repo: Annotated[ATSReportRepository, Depends(get_ats_report_repo)],
+    ats_service: Annotated[
+        ATSAnalysisService,
+        Depends(get_ats_analysis_service),
+    ],
+) -> AnalyzeATSUseCase:
+    return AnalyzeATSUseCase(resume_repo, job_repo, ats_repo, ats_service)
+
+
+def get_list_ats_reports_use_case(
+    ats_repo: Annotated[ATSReportRepository, Depends(get_ats_report_repo)],
+) -> ListATSReportsUseCase:
+    return ListATSReportsUseCase(ats_repo)
+
+
+def get_ats_report_use_case(
+    ats_repo: Annotated[ATSReportRepository, Depends(get_ats_report_repo)],
+) -> GetATSReportUseCase:
+    return GetATSReportUseCase(ats_repo)
+
+
+def get_create_cover_letter_use_case(
+    resume_repo: Annotated[ResumeRepository, Depends(get_resume_repo)],
+    job_repo: Annotated[JobRepository, Depends(get_job_repo)],
+    cover_letter_repo: Annotated[
+        CoverLetterRepository,
+        Depends(get_cover_letter_repo),
+    ],
+    generation_service: Annotated[
+        CoverLetterGenerationService,
+        Depends(get_cover_letter_generation_service),
+    ],
+) -> CreateCoverLetterUseCase:
+    return CreateCoverLetterUseCase(
+        resume_repo,
+        job_repo,
+        cover_letter_repo,
+        generation_service,
+    )
+
+
+def get_list_cover_letters_use_case(
+    cover_letter_repo: Annotated[
+        CoverLetterRepository,
+        Depends(get_cover_letter_repo),
+    ],
+) -> ListCoverLettersUseCase:
+    return ListCoverLettersUseCase(cover_letter_repo)
+
+
+def get_cover_letter_use_case(
+    cover_letter_repo: Annotated[
+        CoverLetterRepository,
+        Depends(get_cover_letter_repo),
+    ],
+) -> GetCoverLetterUseCase:
+    return GetCoverLetterUseCase(cover_letter_repo)
+
+
+def get_update_cover_letter_use_case(
+    cover_letter_repo: Annotated[
+        CoverLetterRepository,
+        Depends(get_cover_letter_repo),
+    ],
+) -> UpdateCoverLetterUseCase:
+    return UpdateCoverLetterUseCase(cover_letter_repo)
+
+
+def get_delete_cover_letter_use_case(
+    cover_letter_repo: Annotated[
+        CoverLetterRepository,
+        Depends(get_cover_letter_repo),
+    ],
+) -> DeleteCoverLetterUseCase:
+    return DeleteCoverLetterUseCase(cover_letter_repo)
 
 
 async def get_current_user(
