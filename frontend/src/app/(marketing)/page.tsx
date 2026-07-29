@@ -1,171 +1,192 @@
-import {
-  ArrowRight,
-  FileSearch,
-  Gauge,
-  PenLine,
-  Sparkles,
-  Target,
-  Upload,
-} from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import { ButtonLink } from "@/shared/ui/button-link"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
-import { Badge } from "@/shared/ui/badge"
+import { ScorePanel } from "@/shared/ui/score-panel"
 
-const features = [
+const matched = ["Python", "PostgreSQL", "REST", "Docker", "CI/CD"]
+const missing = ["Kubernetes", "gRPC", "Terraform"]
+
+const pipeline = [
   {
-    icon: Gauge,
-    title: "ATS match score",
-    body: "See how a résumé scores against a specific job before a recruiter ever reads it, with the keywords you are missing called out.",
+    step: "01",
+    label: "Parse",
+    title: "Your file becomes structured data",
+    body: "PDF and DOCX are extracted into contact, experience, skills, education and projects — the same shape an applicant tracking system builds internally.",
   },
   {
-    icon: Target,
-    title: "Targeted optimization",
-    body: "Rewrite bullets against the job description and keep every version, so you can compare and roll back.",
+    step: "02",
+    label: "Compare",
+    title: "The job description is parsed too",
+    body: "Requirements and keywords are pulled from the posting, then matched field by field against your résumé rather than by keyword count alone.",
   },
   {
-    icon: PenLine,
-    title: "Cover letters",
-    body: "Generate a letter grounded in your own experience and the role you are applying to, then edit it inline.",
-  },
-  {
-    icon: FileSearch,
-    title: "Structured parsing",
-    body: "Your PDF or DOCX becomes structured data — contact, experience, skills, education — ready to analyze.",
+    step: "03",
+    label: "Rewrite",
+    title: "Bullets are rewritten, not invented",
+    body: "Suggestions are grounded in experience you already listed. Every revision is a new version, so you can diff it and roll back.",
   },
 ]
 
-const steps = [
+const surface = [
   {
-    icon: Upload,
-    title: "Upload your résumé",
-    body: "PDF or DOCX. It is parsed into structured sections automatically.",
+    label: "Match score",
+    body: "A single number per résumé-and-job pair, with the keyword gaps that produced it.",
   },
   {
-    icon: Target,
-    title: "Add the job",
-    body: "Paste a job description. Requirements and keywords are extracted for you.",
+    label: "Version history",
+    body: "Every optimization is kept. Compare any two side by side.",
   },
   {
-    icon: Sparkles,
-    title: "Optimize and apply",
-    body: "Get a match score, apply suggested rewrites, and export a tailored résumé and cover letter.",
+    label: "Cover letters",
+    body: "Generated from the same parsed résumé and job, editable inline.",
+  },
+  {
+    label: "Export",
+    body: "Download the tailored résumé as PDF or DOCX when it is ready to send.",
   },
 ]
 
 export default function LandingPage() {
   return (
     <>
-      <section className="border-border/80 relative overflow-hidden border-b">
-        <div
-          aria-hidden
-          className="from-accent/60 pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent"
-        />
-        <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-6 px-4 py-20 text-center sm:px-6 sm:py-28">
-          <Badge variant="secondary" className="gap-1.5">
-            <Sparkles className="size-3.5" />
-            Built on your real experience, not templates
-          </Badge>
-
-          <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
-            Tailor your résumé to the job,
-            <span className="text-primary"> before you apply</span>
-          </h1>
-
-          <p className="text-muted-foreground max-w-2xl text-base sm:text-lg">
-            Most résumés are filtered out by software, not people. ResumeAI scores
-            yours against the job description, shows what is missing, and rewrites it
-            with your own experience intact.
+      <section className="border-border grid border-b lg:grid-cols-[1.05fr_0.95fr]">
+        <div className="border-border flex flex-col justify-center gap-6 px-5 py-14 lg:border-r lg:py-20">
+          <p className="text-muted-foreground font-mono text-xs tracking-widest uppercase">
+            Résumé → Scanner → Recruiter
           </p>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
+          <h1 className="max-w-xl text-4xl leading-[1.05] font-semibold tracking-tight text-balance sm:text-5xl">
+            Most résumés are rejected by software that never explains why.
+          </h1>
+
+          <p className="text-muted-foreground max-w-lg text-base">
+            ResumeAI reads a job description the way an applicant tracking system
+            does, scores your résumé against it, and rewrites the weak lines using
+            experience you already have.
+          </p>
+
+          <div className="flex flex-col gap-3 pt-1 sm:flex-row">
             <ButtonLink size="lg" href="/register">
-              Get started free
+              Score my résumé
               <ArrowRight />
             </ButtonLink>
             <ButtonLink size="lg" variant="outline" href="/login">
               Sign in
             </ButtonLink>
           </div>
-        </div>
-      </section>
 
-      <section
-        id="features"
-        className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24"
-      >
-        <div className="mb-10 max-w-2xl">
-          <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            Everything between your résumé and the interview
-          </h2>
-          <p className="text-muted-foreground mt-3">
-            Four tools that work off the same parsed résumé, so nothing is retyped.
+          <p className="text-muted-foreground font-mono text-xs">
+            PDF or DOCX · no template required
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          {features.map(({ icon: Icon, title, body }) => (
-            <Card key={title}>
-              <CardHeader>
-                <span className="bg-accent text-accent-foreground mb-1 flex size-9 items-center justify-center rounded-lg">
-                  <Icon className="size-4.5" />
+        <div className="bg-card/40 flex items-center px-5 py-10 lg:py-20">
+          <ScorePanel matched={matched} missing={missing} />
+        </div>
+      </section>
+
+      <section id="analysis" className="border-border border-b px-5 py-14">
+        <SectionHeading eyebrow="What the scanner sees" number="00" />
+        <div className="bg-border mt-8 grid gap-px sm:grid-cols-3">
+          <Stat value="6s" label="Median recruiter scan" />
+          <Stat value="75%" label="Filtered before a human reads" />
+          <Stat value="1" label="Résumé that fits every job" negated />
+        </div>
+      </section>
+
+      <section id="pipeline" className="border-border border-b">
+        <div className="px-5 pt-14 pb-6">
+          <SectionHeading eyebrow="Pipeline" number="01" />
+        </div>
+        <ol>
+          {pipeline.map(({ step, label, title, body }) => (
+            <li
+              key={step}
+              className="border-border grid gap-3 border-t px-5 py-8 sm:grid-cols-[7rem_1fr] sm:gap-8"
+            >
+              <div className="flex items-baseline gap-3 sm:flex-col sm:gap-1">
+                <span className="text-primary font-mono text-sm tabular">
+                  {step}
                 </span>
-                <CardTitle>{title}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-muted-foreground text-sm">
-                {body}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
-      <section
-        id="how-it-works"
-        className="border-border/80 bg-card/40 border-y"
-      >
-        <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-          <div className="mb-10 max-w-2xl">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-              How it works
-            </h2>
-            <p className="text-muted-foreground mt-3">
-              Three steps from an untargeted résumé to an application worth sending.
-            </p>
-          </div>
-
-          <ol className="grid gap-6 sm:grid-cols-3">
-            {steps.map(({ icon: Icon, title, body }, index) => (
-              <li key={title} className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="bg-primary text-primary-foreground tabular flex size-8 items-center justify-center rounded-full text-sm font-semibold">
-                    {index + 1}
-                  </span>
-                  <Icon className="text-muted-foreground size-4" />
-                </div>
-                <h3 className="font-medium">{title}</h3>
+                <span className="text-muted-foreground font-mono text-xs tracking-widest uppercase">
+                  {label}
+                </span>
+              </div>
+              <div className="max-w-2xl space-y-2">
+                <h3 className="text-lg font-medium tracking-tight">{title}</h3>
                 <p className="text-muted-foreground text-sm">{body}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
+              </div>
+            </li>
+          ))}
+        </ol>
       </section>
 
-      <section className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
-        <Card className="bg-card">
-          <CardContent className="flex flex-col items-center gap-5 py-12 text-center">
-            <h2 className="max-w-xl text-2xl font-semibold tracking-tight sm:text-3xl">
-              Stop guessing why you never heard back
-            </h2>
-            <p className="text-muted-foreground max-w-lg text-sm sm:text-base">
-              Upload one résumé and one job description to see your first match score.
-            </p>
-            <ButtonLink size="lg" href="/register">
-              Create your account
-              <ArrowRight />
-            </ButtonLink>
-          </CardContent>
-        </Card>
+      <section id="surface" className="border-border border-b px-5 py-14">
+        <SectionHeading eyebrow="Surface" number="02" />
+        <dl className="mt-8 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+          {surface.map(({ label, body }) => (
+            <div key={label} className="border-border border-t pt-4">
+              <dt className="font-medium">{label}</dt>
+              <dd className="text-muted-foreground mt-1 text-sm">{body}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className="flex flex-col gap-5 px-5 py-16 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <h2 className="max-w-md text-2xl font-semibold tracking-tight">
+            Find out what the scanner already knows.
+          </h2>
+          <p className="text-muted-foreground font-mono text-xs tracking-wide">
+            One résumé · one job description · one score
+          </p>
+        </div>
+        <ButtonLink size="lg" href="/register">
+          Get started
+          <ArrowRight />
+        </ButtonLink>
       </section>
     </>
+  )
+}
+
+function SectionHeading({
+  eyebrow,
+  number,
+}: {
+  eyebrow: string
+  number: string
+}) {
+  return (
+    <div className="flex items-baseline gap-3">
+      <span className="text-muted-foreground font-mono text-xs tabular">
+        {number}
+      </span>
+      <h2 className="font-mono text-xs tracking-widest uppercase">{eyebrow}</h2>
+      <span aria-hidden className="bg-border h-px flex-1" />
+    </div>
+  )
+}
+
+function Stat({
+  value,
+  label,
+  negated,
+}: {
+  value: string
+  label: string
+  negated?: boolean
+}) {
+  return (
+    <div className="bg-background px-1 py-4 sm:px-5 sm:first:pl-0">
+      <p
+        className={`tabular text-3xl font-semibold tracking-tight ${
+          negated ? "text-muted-foreground line-through decoration-2" : ""
+        }`}
+      >
+        {value}
+      </p>
+      <p className="text-muted-foreground mt-1 text-sm">{label}</p>
+    </div>
   )
 }
