@@ -2,6 +2,16 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { useState, type ReactNode } from "react"
+import { ApiError } from "@/shared/api/client"
+import { TooltipProvider } from "@/shared/ui/tooltip"
+import { Toaster } from "@/shared/ui/sonner"
+
+function shouldRetry(failureCount: number, error: unknown): boolean {
+  if (error instanceof ApiError && error.isClientError) {
+    return false
+  }
+  return failureCount < 2
+}
 
 export function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -10,7 +20,11 @@ export function Providers({ children }: { children: ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 60 * 1000,
-            retry: 1,
+            retry: shouldRetry,
+            refetchOnWindowFocus: false,
+          },
+          mutations: {
+            retry: false,
           },
         },
       })
@@ -18,7 +32,8 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <TooltipProvider>{children}</TooltipProvider>
+      <Toaster richColors closeButton position="top-right" />
     </QueryClientProvider>
   )
 }
