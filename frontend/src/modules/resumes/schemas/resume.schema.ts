@@ -2,10 +2,9 @@ import { z } from "zod"
 
 export const resumeSchema = z.object({
   id: z.string(),
-  user_id: z.string(),
   name: z.string(),
-  original_file_url: z.string().optional(),
-  parsed_json: z.record(z.string(), z.unknown()).optional(),
+  original_file_url: z.string(),
+  parsed_json: z.record(z.string(), z.unknown()).nullable(),
   created_at: z.string(),
 })
 export type Resume = z.infer<typeof resumeSchema>
@@ -24,3 +23,11 @@ export const resumeUploadResponseSchema = z.object({
   file_url: z.string().nullable().optional(),
 })
 export type ResumeUploadResponse = z.infer<typeof resumeUploadResponseSchema>
+
+export const resumeUploadRequestSchema = z.object({
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(100, "Name must be at most 100 characters"),
+})
+export type ResumeUploadRequest = z.infer<typeof resumeUploadRequestSchema>

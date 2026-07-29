@@ -1,75 +1,127 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+import { ApiError, apiErrorFromBody, apiErrorFromResponse } from "./errors"
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const { supabase } = await import("@/shared/lib/supabase")
-  const { data: { session } } = await supabase.auth.getSession()
-  const headers: Record<string, string> = { "Content-Type": "application/json" }
-  if (session?.access_token) {
-    headers["Authorization"] = `Bearer ${session.access_token}`
-  }
-  return headers
+export type RequestOptions = {
+  signal?: AbortSignal
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: "Unknown error" }))
-    throw new Error(error.detail || `HTTP ${response.status}`)
+export type HealthStatus = {
+  status: string
+  service: string
+}
+
+async function request<T>(
+  method: string,
+  path: string,
+  body?: unknown,
+  options: RequestOptions = {}
+): Promise<T> {
+  const headers: Record<string, string> = {}
+
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json"
   }
-  return response.json()
+
+  let response: Response
+
+  try {
+    response = await fetch(path, {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      signal: options.signal,
+    })
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw error
+    }
+    throw new ApiError(0, "Network error. Check your connection and try again.")
+  }
+
+  if (!response.ok) {
+    throw await apiErrorFromResponse(response)
+  }
+
+  if (response.status === 204) {
+    return undefined as T
+  }
+
+  return (await response.json()) as T
+}
+
+export type UploadOptions = RequestOptions & {
+  onProgress?: (percent: number) => void
+}
+
+function upload<T>(
+  path: string,
+  formData: FormData,
+  options: UploadOptions = {}
+): Promise<T> {
+  const { onProgress, signal } = options
+
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open("POST", path)
+
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable && onProgress) {
+        onProgress(Math.round((event.loaded / event.total) * 100))
+      }
+    }
+
+    xhr.onload = () => {
+      let body: unknown = null
+      try {
+        body = xhr.responseText ? JSON.parse(xhr.responseText) : null
+      } catch {
+        body = null
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(body as T)
+        return
+      }
+
+      reject(apiErrorFromBody(xhr.status, body))
+    }
+
+    xhr.onerror = () =>
+      reject(new ApiError(0, "Network error. Check your connection and try again."))
+    xhr.onabort = () => reject(new ApiError(0, "Upload cancelled"))
+
+    if (signal) {
+      if (signal.aborted) {
+        xhr.abort()
+        return
+      }
+      signal.addEventListener("abort", () => xhr.abort(), { once: true })
+    }
+
+    xhr.send(formData)
+  })
 }
 
 export const api = {
-  async get<T>(path: string): Promise<T> {
-    const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE}${path}`, { headers })
-    return handleResponse<T>(response)
-  },
+  get: <T>(path: string, options?: RequestOptions) =>
+    request<T>("GET", path, undefined, options),
 
-  async post<T>(path: string, body?: unknown): Promise<T> {
-    const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE}${path}`, {
-      method: "POST",
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    })
-    return handleResponse<T>(response)
-  },
+  post: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    request<T>("POST", path, body, options),
 
-  async patch<T>(path: string, body?: unknown): Promise<T> {
-    const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE}${path}`, {
-      method: "PATCH",
-      headers,
-      body: body ? JSON.stringify(body) : undefined,
-    })
-    return handleResponse<T>(response)
-  },
+  patch: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    request<T>("PATCH", path, body, options),
 
-  async remove<T>(path: string): Promise<T> {
-    const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE}${path}`, {
-      method: "DELETE",
-      headers,
-    })
-    if (response.status === 204) {
-      return undefined as T
-    }
-    return handleResponse<T>(response)
-  },
+  put: <T>(path: string, body?: unknown, options?: RequestOptions) =>
+    request<T>("PUT", path, body, options),
 
-  async upload<T>(path: string, formData: FormData): Promise<T> {
-    const headers = await getAuthHeaders()
-    delete headers["Content-Type"]
-    const response = await fetch(`${API_BASE}${path}`, {
-      method: "POST",
-      headers,
-      body: formData,
-    })
-    return handleResponse<T>(response)
-  },
+  remove: <T>(path: string, options?: RequestOptions) =>
+    request<T>("DELETE", path, undefined, options),
 
-  async health(): Promise<{ status: string; service: string }> {
-    const response = await fetch(`${API_BASE}/api/v1/health`)
-    return handleResponse(response)
-  },
+  upload,
+
+  health: (options?: RequestOptions) =>
+    request<HealthStatus>("GET", "/api/health", undefined, options),
 }
+
+export { ApiError } from "./errors"
+export type { FieldErrors } from "./errors"
