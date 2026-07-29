@@ -1,7 +1,7 @@
 import Link from "next/link"
 import type { ReactNode } from "react"
 import { FileText } from "lucide-react"
-import { Button } from "@/shared/ui/button"
+import { ButtonLink } from "@/shared/ui/button-link"
 import { ThemeToggle } from "@/shared/ui/theme-toggle"
 import { BackendStatus } from "@/shared/ui/backend-status"
 
@@ -34,12 +34,12 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
 
           <div className="flex items-center gap-1">
             <ThemeToggle />
-            <Button variant="ghost" size="sm" render={<Link href="/login" />}>
+            <ButtonLink variant="ghost" size="sm" href="/login">
               Sign in
-            </Button>
-            <Button size="sm" render={<Link href="/register" />}>
+            </ButtonLink>
+            <ButtonLink size="sm" href="/register">
               Get started
-            </Button>
+            </ButtonLink>
           </div>
         </div>
       </header>

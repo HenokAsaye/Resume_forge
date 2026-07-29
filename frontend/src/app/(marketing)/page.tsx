@@ -1,4 +1,3 @@
-import Link from "next/link"
 import {
   ArrowRight,
   FileSearch,
@@ -8,7 +7,7 @@ import {
   Target,
   Upload,
 } from "lucide-react"
-import { Button } from "@/shared/ui/button"
+import { ButtonLink } from "@/shared/ui/button-link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card"
 import { Badge } from "@/shared/ui/badge"
 
@@ -79,13 +78,13 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" render={<Link href="/register" />}>
+            <ButtonLink size="lg" href="/register">
               Get started free
               <ArrowRight />
-            </Button>
-            <Button size="lg" variant="outline" render={<Link href="/login" />}>
+            </ButtonLink>
+            <ButtonLink size="lg" variant="outline" href="/login">
               Sign in
-            </Button>
+            </ButtonLink>
           </div>
         </div>
       </section>
@@ -160,10 +159,10 @@ export default function LandingPage() {
             <p className="text-muted-foreground max-w-lg text-sm sm:text-base">
               Upload one résumé and one job description to see your first match score.
             </p>
-            <Button size="lg" render={<Link href="/register" />}>
+            <ButtonLink size="lg" href="/register">
               Create your account
               <ArrowRight />
-            </Button>
+            </ButtonLink>
           </CardContent>
         </Card>
       </section>
