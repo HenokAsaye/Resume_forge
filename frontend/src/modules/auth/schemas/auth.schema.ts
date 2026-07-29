@@ -50,3 +50,8 @@ export const sessionSchema = z.object({
   name: z.string().nullable().optional(),
 })
 export type Session = z.infer<typeof sessionSchema>
+
+export const registerResultSchema = sessionSchema.extend({
+  requires_email_confirmation: z.boolean(),
+})
+export type RegisterResult = z.infer<typeof registerResultSchema>
