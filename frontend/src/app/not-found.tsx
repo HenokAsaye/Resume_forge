@@ -1,5 +1,4 @@
-import Link from "next/link"
-import { Button } from "@/shared/ui/button"
+import { ButtonLink } from "@/shared/ui/button-link"
 
 export default function NotFound() {
   return (
@@ -8,7 +7,7 @@ export default function NotFound() {
       <p className="text-muted-foreground max-w-md text-sm">
         That page does not exist or has been moved.
       </p>
-      <Button render={<Link href="/" />}>Back home</Button>
+      <ButtonLink href="/">Back home</ButtonLink>
     </main>
   )
 }
