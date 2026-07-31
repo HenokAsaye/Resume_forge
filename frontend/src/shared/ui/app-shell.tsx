@@ -29,7 +29,7 @@ const NAV: NavItem[] = [
   { href: "/resumes", label: "Résumés", icon: FileText, ready: true },
   { href: "/jobs", label: "Jobs", icon: Briefcase, ready: true },
   { href: "/ats", label: "ATS reports", icon: Gauge, ready: true },
-  { href: "/cover-letters", label: "Cover letters", icon: PenLine, ready: false },
+  { href: "/cover-letters", label: "Cover letters", icon: PenLine, ready: true },
 ]
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {

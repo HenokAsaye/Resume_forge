@@ -1,2 +1,6 @@
+export { DeleteLetterDialog } from "./components/delete-letter-dialog"
+export { GenerateForm, type LetterOption } from "./components/generate-form"
+export { LetterEditor } from "./components/letter-editor"
+export { LetterList, formatLetterDate, type NameLookup } from "./components/letter-list"
 export * from "./schemas/cover-letter.schema"
 export * from "./api/use-cover-letters"
