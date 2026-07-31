@@ -1,2 +1,7 @@
+export { ChangeList } from "./components/change-list"
+export { ExportButtons } from "./components/export-buttons"
+export { OptimizeDialog, type JobOption } from "./components/optimize-dialog"
+export { ScoreDelta } from "./components/score-delta"
+export { VersionTimeline } from "./components/version-timeline"
 export * from "./schemas/version.schema"
 export * from "./api/use-optimization"
