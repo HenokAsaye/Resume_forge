@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowLeft, Download, Loader2, Sparkles, Trash2 } from "lucide-react"
+import { ArrowLeft, Download, GitBranch, Loader2, Sparkles, Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { ApiError } from "@/shared/api/client"
 import { Alert, AlertDescription } from "@/shared/ui/alert"
@@ -115,6 +115,15 @@ export function ResumeDetail({ id }: { id: string }) {
             >
               <Download />
               Original
+            </Button>
+
+            <Button
+              variant="outline"
+              nativeButton={false}
+              render={<Link href={`/resumes/${id}/versions`} />}
+            >
+              <GitBranch />
+              Versions
             </Button>
 
             <DeleteResumeDialog
