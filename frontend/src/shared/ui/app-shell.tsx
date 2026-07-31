@@ -92,6 +92,13 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen">
+      <a
+        href="#main"
+        className="bg-background focus-visible:ring-ring sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-3 focus-visible:left-3 focus-visible:z-50 focus-visible:rounded-lg focus-visible:px-3 focus-visible:py-2 focus-visible:text-sm focus-visible:ring-3"
+      >
+        Skip to content
+      </a>
+
       <aside className="border-border bg-card/30 hidden w-60 shrink-0 flex-col border-r lg:flex">
         <div className="border-border flex h-14 items-center border-b px-5">
           <Link href="/dashboard" className="flex items-baseline gap-2">
@@ -138,7 +145,9 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <main id="main" tabIndex={-1} className="flex-1 px-4 py-6 sm:px-6 sm:py-8">
+          {children}
+        </main>
       </div>
     </div>
   )
