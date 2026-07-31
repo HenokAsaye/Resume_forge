@@ -6,6 +6,7 @@ import { Button } from "@/shared/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -38,14 +39,16 @@ export function UserMenu() {
         }
       />
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="flex flex-col gap-0.5">
-          <span className="truncate text-sm font-medium">{label}</span>
-          {user?.email && user.name && (
-            <span className="text-muted-foreground truncate text-xs font-normal">
-              {user.email}
-            </span>
-          )}
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex flex-col gap-0.5">
+            <span className="truncate text-sm font-medium">{label}</span>
+            {user?.email && user.name && (
+              <span className="text-muted-foreground truncate text-xs font-normal">
+                {user.email}
+              </span>
+            )}
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem disabled>
           <UserIcon />
