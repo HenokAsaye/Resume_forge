@@ -1,2 +1,7 @@
+export { DeleteResumeDialog } from "./components/delete-resume-dialog"
+export { ParsedResume } from "./components/parsed-resume"
+export { ResumeDetail } from "./components/resume-detail"
+export { ResumeList } from "./components/resume-list"
+export { UploadResumeDialog } from "./components/upload-resume-dialog"
 export * from "./schemas/resume.schema"
 export * from "./api/use-resumes"
