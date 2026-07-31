@@ -29,10 +29,11 @@ export function LetterEditor({
 }) {
   const update = useUpdateCoverLetter(letter.id)
   const [content, setContent] = useState(letter.content)
+  const [saved, setSaved] = useState(letter.content)
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
-  const dirty = content !== letter.content
+  const dirty = content !== saved
   const words = content.trim() ? content.trim().split(/\s+/).length : 0
 
   async function onSave() {
@@ -46,8 +47,9 @@ export function LetterEditor({
     setError(null)
 
     try {
-      const saved = await update.mutateAsync(parsed.data)
-      setContent(saved.content)
+      const result = await update.mutateAsync(parsed.data)
+      setContent(result.content)
+      setSaved(result.content)
       toast.success("Saved")
     } catch (cause) {
       setError(
