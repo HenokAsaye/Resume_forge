@@ -1,2 +1,7 @@
+export { AnalyzeForm, type AnalyzeOption } from "./components/analyze-form"
+export { ReportHistory, type NameLookup } from "./components/report-history"
+export { ReportView, formatReportDate } from "./components/report-view"
+export { ScoreMeter } from "./components/score-meter"
+export * from "./lib/score"
 export * from "./schemas/ats.schema"
 export * from "./api/use-ats"

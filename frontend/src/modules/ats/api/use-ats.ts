@@ -4,29 +4,54 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/shared/api/client"
 import type { AnalyzeAtsRequest, ATSReport } from "../schemas/ats.schema"
 
-const atsKeys = {
-  reports: ["ats", "reports"] as const,
+export type ReportFilters = {
+  resumeId?: string
+  jobId?: string
+}
+
+export const atsKeys = {
+  all: ["ats"] as const,
+  reports: (filters: ReportFilters = {}) =>
+    [...atsKeys.all, "reports", filters.resumeId ?? null, filters.jobId ?? null] as const,
+  report: (id: string) => [...atsKeys.all, "report", id] as const,
+}
+
+function reportsPath(filters: ReportFilters): string {
+  const search = new URLSearchParams()
+  if (filters.resumeId) {
+    search.set("resume_id", filters.resumeId)
+  }
+  if (filters.jobId) {
+    search.set("job_id", filters.jobId)
+  }
+  const query = search.toString()
+  return `/api/ats/reports${query ? `?${query}` : ""}`
+}
+
+export function useAtsReports(filters: ReportFilters = {}) {
+  return useQuery({
+    queryKey: atsKeys.reports(filters),
+    queryFn: () => api.get<ATSReport[]>(reportsPath(filters)),
+  })
+}
+
+export function useAtsReport(id: string) {
+  return useQuery({
+    queryKey: atsKeys.report(id),
+    queryFn: () => api.get<ATSReport>(`/api/ats/reports/${id}`),
+    enabled: Boolean(id),
+  })
 }
 
 export function useAnalyzeAts() {
   const queryClient = useQueryClient()
+
   return useMutation({
     mutationFn: (body: AnalyzeAtsRequest) =>
-      api.post<ATSReport>("/api/v1/ats/analyze", body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: atsKeys.reports })
+      api.post<ATSReport>("/api/ats/analyze", body),
+    onSuccess: (report) => {
+      queryClient.setQueryData(atsKeys.report(report.id), report)
+      queryClient.invalidateQueries({ queryKey: atsKeys.all })
     },
-  })
-}
-
-export function useAtsReports(params?: { resumeId?: string; jobId?: string }) {
-  const search = new URLSearchParams()
-  if (params?.resumeId) search.set("resume_id", params.resumeId)
-  if (params?.jobId) search.set("job_id", params.jobId)
-  const query = search.toString()
-  return useQuery({
-    queryKey: [...atsKeys.reports, params ?? {}],
-    queryFn: () =>
-      api.get<ATSReport[]>(`/api/v1/ats/reports${query ? `?${query}` : ""}`),
   })
 }
