@@ -26,7 +26,7 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, ready: true },
-  { href: "/resumes", label: "Résumés", icon: FileText, ready: false },
+  { href: "/resumes", label: "Résumés", icon: FileText, ready: true },
   { href: "/jobs", label: "Jobs", icon: Briefcase, ready: false },
   { href: "/ats", label: "ATS reports", icon: Gauge, ready: false },
   { href: "/cover-letters", label: "Cover letters", icon: PenLine, ready: false },
