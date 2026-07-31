@@ -2,46 +2,73 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { api } from "@/shared/api/client"
-import type { CreateJobRequest, JobDescription } from "../schemas/job.schema"
+import type {
+  CreateJobRequest,
+  JobDetail,
+  JobParseResult,
+  JobSummary,
+} from "../schemas/job.schema"
 
-const jobKeys = {
+export const jobKeys = {
   all: ["jobs"] as const,
-  detail: (id: string) => ["jobs", id] as const,
+  list: () => [...jobKeys.all, "list"] as const,
+  detail: (id: string) => [...jobKeys.all, "detail", id] as const,
 }
 
 export function useJobs() {
   return useQuery({
-    queryKey: jobKeys.all,
-    queryFn: () => api.get<JobDescription[]>("/api/v1/jobs"),
+    queryKey: jobKeys.list(),
+    queryFn: () => api.get<JobSummary[]>("/api/jobs"),
   })
 }
 
 export function useJob(id: string) {
   return useQuery({
     queryKey: jobKeys.detail(id),
-    queryFn: () => api.get<JobDescription>(`/api/v1/jobs/${id}`),
+    queryFn: () => api.get<JobDetail>(`/api/jobs/${id}`),
     enabled: Boolean(id),
   })
 }
 
 export function useCreateJob() {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: (body: CreateJobRequest) =>
-      api.post<JobDescription>("/api/v1/jobs", body),
+    mutationFn: (payload: CreateJobRequest) =>
+      api.post<JobSummary>("/api/jobs", {
+        title: payload.title,
+        company: payload.company,
+        raw_text: payload.raw_text,
+        url: payload.url === "" ? null : payload.url,
+      }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: jobKeys.all })
+      queryClient.invalidateQueries({ queryKey: jobKeys.list() })
     },
   })
 }
 
 export function useParseJob() {
   const queryClient = useQueryClient()
+
   return useMutation({
-    mutationFn: (id: string) =>
-      api.post<JobDescription>(`/api/v1/jobs/${id}/parse`),
-    onSuccess: (job) => {
-      queryClient.invalidateQueries({ queryKey: jobKeys.detail(job.id) })
+    mutationFn: (id: string) => api.post<JobParseResult>(`/api/jobs/${id}/parse`),
+    onSuccess: (result) => {
+      queryClient.setQueryData<JobDetail>(jobKeys.detail(result.id), (previous) =>
+        previous ? { ...previous, parsed_json: result.parsed_json } : previous
+      )
+      queryClient.invalidateQueries({ queryKey: jobKeys.detail(result.id) })
+    },
+  })
+}
+
+export function useDeleteJob() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => api.remove<void>(`/api/jobs/${id}`),
+    onSuccess: (_result, id) => {
+      queryClient.removeQueries({ queryKey: jobKeys.detail(id) })
+      queryClient.invalidateQueries({ queryKey: jobKeys.list() })
     },
   })
 }
