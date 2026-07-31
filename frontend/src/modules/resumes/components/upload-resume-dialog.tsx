@@ -170,6 +170,7 @@ export function UploadResumeDialog({ trigger }: { trigger?: ReactElement }) {
             <input
               ref={inputRef}
               type="file"
+              aria-label="Résumé file"
               accept={ACCEPT_ATTRIBUTE}
               className="sr-only"
               disabled={busy}
