@@ -92,6 +92,17 @@ export async function authedBackendFetch(
   })
 }
 
+async function toErrorResponse(error: unknown): Promise<Response> {
+  if (error instanceof SessionExpiredError) {
+    await clearSession()
+    return sessionExpiredResponse()
+  }
+  if (error instanceof BackendUnreachableError) {
+    return backendUnreachableResponse()
+  }
+  throw error
+}
+
 export async function proxyToBackend(
   path: string,
   init: Omit<BackendRequestInit, "accessToken"> = {}
@@ -99,13 +110,33 @@ export async function proxyToBackend(
   try {
     return await relayJson(await authedBackendFetch(path, init))
   } catch (error) {
-    if (error instanceof SessionExpiredError) {
-      await clearSession()
-      return sessionExpiredResponse()
+    return toErrorResponse(error)
+  }
+}
+
+const FILE_HEADERS = ["content-type", "content-disposition", "content-length"]
+
+export async function proxyFileToBackend(
+  path: string,
+  init: Omit<BackendRequestInit, "accessToken"> = {}
+): Promise<Response> {
+  try {
+    const upstream = await authedBackendFetch(path, init)
+
+    if (!upstream.ok) {
+      return relayJson(upstream)
     }
-    if (error instanceof BackendUnreachableError) {
-      return backendUnreachableResponse()
+
+    const headers = new Headers()
+    for (const name of FILE_HEADERS) {
+      const value = upstream.headers.get(name)
+      if (value) {
+        headers.set(name, value)
+      }
     }
-    throw error
+
+    return new Response(upstream.body, { status: upstream.status, headers })
+  } catch (error) {
+    return toErrorResponse(error)
   }
 }
