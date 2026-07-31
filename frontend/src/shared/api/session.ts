@@ -25,6 +25,13 @@ export class SessionExpiredError extends Error {
   }
 }
 
+export class RefreshUnavailableError extends Error {
+  constructor() {
+    super("Could not renew your session. Try again in a moment.")
+    this.name = "RefreshUnavailableError"
+  }
+}
+
 const baseCookie = {
   httpOnly: true,
   sameSite: "lax",
@@ -69,16 +76,61 @@ export async function hasSession(): Promise<boolean> {
 
 const inFlightRefreshes = new Map<string, Promise<string>>()
 
+const ROTATION_GRACE_MS = 60 * 1000
+const rotatedTokens = new Map<string, { accessToken: string; at: number }>()
+
+function rememberRotation(usedToken: string, accessToken: string): void {
+  const now = Date.now()
+
+  for (const [token, entry] of rotatedTokens) {
+    if (now - entry.at > ROTATION_GRACE_MS) {
+      rotatedTokens.delete(token)
+    }
+  }
+
+  rotatedTokens.set(usedToken, { accessToken, at: now })
+}
+
+function recallRotation(usedToken: string): string | null {
+  const entry = rotatedTokens.get(usedToken)
+
+  if (!entry || Date.now() - entry.at > ROTATION_GRACE_MS) {
+    return null
+  }
+
+  return entry.accessToken
+}
+
 async function requestRotatedSession(refreshToken: string): Promise<string> {
-  const response = await fetch(`${env.API_URL}/api/v1/auth/refresh`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ refresh_token: refreshToken }),
-    cache: "no-store",
-  })
+  let response: Response
+
+  try {
+    response = await fetch(`${env.API_URL}/api/v1/auth/refresh`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+      cache: "no-store",
+    })
+  } catch {
+    throw new RefreshUnavailableError()
+  }
 
   if (!response.ok) {
-    throw new SessionExpiredError()
+    const replayed = recallRotation(refreshToken)
+    if (replayed) {
+      return replayed
+    }
+
+    const current = await readRefreshToken()
+    if (current && current !== refreshToken) {
+      return requestRotatedSession(current)
+    }
+
+    if (response.status === 400 || response.status === 401) {
+      throw new SessionExpiredError()
+    }
+
+    throw new RefreshUnavailableError()
   }
 
   const session = (await response.json()) as BackendSession
@@ -88,6 +140,8 @@ async function requestRotatedSession(refreshToken: string): Promise<string> {
   }
 
   await persistSession(session)
+  rememberRotation(refreshToken, session.access_token)
+
   return session.access_token
 }
 
@@ -96,6 +150,11 @@ export async function refreshAccessToken(): Promise<string> {
 
   if (!refreshToken) {
     throw new SessionExpiredError()
+  }
+
+  const replayed = recallRotation(refreshToken)
+  if (replayed) {
+    return replayed
   }
 
   const existing = inFlightRefreshes.get(refreshToken)

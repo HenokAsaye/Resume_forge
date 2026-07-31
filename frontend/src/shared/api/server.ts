@@ -4,6 +4,7 @@ import { env } from "@/shared/lib/env"
 import {
   clearSession,
   refreshAccessToken,
+  RefreshUnavailableError,
   requireAccessToken,
   SessionExpiredError,
 } from "./session"
@@ -73,6 +74,13 @@ export function sessionExpiredResponse(): Response {
   )
 }
 
+export function refreshUnavailableResponse(): Response {
+  return Response.json(
+    { detail: "Could not renew your session. Try again in a moment." },
+    { status: 503 }
+  )
+}
+
 export async function authedBackendFetch(
   path: string,
   init: Omit<BackendRequestInit, "accessToken"> = {}
@@ -96,6 +104,9 @@ async function toErrorResponse(error: unknown): Promise<Response> {
   if (error instanceof SessionExpiredError) {
     await clearSession()
     return sessionExpiredResponse()
+  }
+  if (error instanceof RefreshUnavailableError) {
+    return refreshUnavailableResponse()
   }
   if (error instanceof BackendUnreachableError) {
     return backendUnreachableResponse()
