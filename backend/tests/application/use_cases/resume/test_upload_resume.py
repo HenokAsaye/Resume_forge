@@ -1,6 +1,7 @@
 from unittest.mock import AsyncMock
 
 import pytest
+
 from application.interfaces.services.file_storage_service import StoredFile
 from application.interfaces.services.file_validation_service import ValidatedFile
 from application.use_cases.resume.upload_resume import UploadResumeUseCase

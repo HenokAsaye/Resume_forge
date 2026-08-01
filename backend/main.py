@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 
-from config import get_settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from config import get_settings
 from interfaces.api.exception_handlers import register_exception_handlers
 from interfaces.api.v1.ats import router as ats_router
 from interfaces.api.v1.auth import router as auth_router

@@ -2,6 +2,7 @@ from collections.abc import Callable
 from unittest.mock import Mock
 
 import pytest
+
 from application.exceptions import AIConfigurationError
 from application.interfaces.services.structured_generation_service import (
     StructuredGenerationService,

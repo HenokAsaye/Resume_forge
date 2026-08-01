@@ -1,6 +1,6 @@
-from config import Settings
-
 from supabase import AsyncClient, Client, acreate_client, create_client
+
+from config import Settings
 
 
 def create_supabase_client(settings: Settings) -> Client:

@@ -3,6 +3,8 @@ from typing import cast
 from unittest.mock import AsyncMock
 
 import pytest
+from openai import AsyncOpenAI
+
 from application.dto.resume_schema import ResumeDocument
 from application.exceptions import (
     EmptyResumeTextError,
@@ -10,7 +12,6 @@ from application.exceptions import (
 )
 from application.services import StructuredResumeParsingService
 from infrastructure.ai import OpenAIStructuredService
-from openai import AsyncOpenAI
 
 
 def make_resume() -> ResumeDocument:

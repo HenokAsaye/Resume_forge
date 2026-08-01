@@ -1,12 +1,12 @@
+from postgrest.exceptions import APIError
+from supabase import AsyncClient
+
 from domain.entities.cover_letter import CoverLetter
 from domain.exceptions import CareerRepositoryError
 from domain.interfaces.repositories.cover_letter_repository import (
     CoverLetterRepository,
 )
 from infrastructure.database.mappers.career_mapper import CareerMapper
-from postgrest.exceptions import APIError
-
-from supabase import AsyncClient
 
 
 class SupabaseCoverLetterRepository(CoverLetterRepository):

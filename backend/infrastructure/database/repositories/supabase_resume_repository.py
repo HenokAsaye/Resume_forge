@@ -2,6 +2,9 @@ import logging
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
+from postgrest.exceptions import APIError
+from supabase import AsyncClient
+
 from domain.entities.resume import Resume, ResumeVersion
 from domain.exceptions import (
     ResumeNotFoundError,
@@ -10,9 +13,6 @@ from domain.exceptions import (
 )
 from domain.interfaces.repositories.resume_repository import ResumeRepository
 from infrastructure.database.mappers.resume_mapper import ResumeMapper
-from postgrest.exceptions import APIError
-
-from supabase import AsyncClient
 
 ResultT = TypeVar("ResultT")
 logger = logging.getLogger(__name__)

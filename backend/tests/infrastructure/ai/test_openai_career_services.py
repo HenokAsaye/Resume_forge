@@ -3,6 +3,8 @@ from typing import cast
 from unittest.mock import AsyncMock
 
 import pytest
+from openai import AsyncOpenAI
+
 from application.dto.career_ai_schema import (
     ATSAnalysis,
     CoverLetterDocument,
@@ -19,7 +21,6 @@ from application.services import (
     StructuredResumeOptimizationService,
 )
 from infrastructure.ai import OpenAIStructuredService
-from openai import AsyncOpenAI
 
 
 def make_resume() -> ResumeDocument:

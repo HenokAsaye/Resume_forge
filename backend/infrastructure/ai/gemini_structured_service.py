@@ -2,6 +2,10 @@ import asyncio
 from typing import Any
 
 import httpx
+from google import genai
+from google.genai import errors, types
+from pydantic import ValidationError
+
 from application.exceptions import (
     LLMAuthenticationError,
     LLMProviderError,
@@ -13,9 +17,6 @@ from application.interfaces.services.structured_generation_service import (
     OutputT,
     StructuredGenerationService,
 )
-from google import genai
-from google.genai import errors, types
-from pydantic import ValidationError
 
 
 class GeminiStructuredService(StructuredGenerationService):

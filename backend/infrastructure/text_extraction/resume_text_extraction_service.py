@@ -3,6 +3,11 @@ import io
 from collections.abc import Iterable
 
 import pymupdf
+from docx import Document
+from docx.document import Document as DocumentObject
+from docx.table import Table
+from docx.text.paragraph import Paragraph
+
 from application.exceptions import (
     DocumentTextExtractionError,
     NoExtractableTextError,
@@ -12,10 +17,6 @@ from application.interfaces.services.document_text_extraction_service import (
     DocumentTextExtractionService,
     ExtractedDocument,
 )
-from docx import Document
-from docx.document import Document as DocumentObject
-from docx.table import Table
-from docx.text.paragraph import Paragraph
 from domain.entities.resume import ResumeMimeType
 
 

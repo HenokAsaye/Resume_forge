@@ -2,6 +2,18 @@ from typing import Annotated
 from urllib.parse import quote
 from uuid import UUID
 
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    Query,
+    Request,
+    Response,
+    UploadFile,
+    status,
+)
+
 from application.dto.career_dto import (
     ResumeOptimizationResponse,
     ResumeOptimizeRequest,
@@ -31,17 +43,6 @@ from config import Settings, get_settings
 from domain.entities.resume import Resume
 from domain.exceptions import ResumeNotParsedError
 from domain.interfaces.services.auth_service import AuthenticatedUser
-from fastapi import (
-    APIRouter,
-    Depends,
-    File,
-    Form,
-    Query,
-    Request,
-    Response,
-    UploadFile,
-    status,
-)
 from interfaces.api.deps import (
     get_current_user,
     get_delete_resume_use_case,

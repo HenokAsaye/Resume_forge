@@ -1,4 +1,5 @@
 import pytest
+
 from application.services.prompts import get_prompt, load_prompts
 
 

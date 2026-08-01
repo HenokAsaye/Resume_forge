@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 
 import pytest
 import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
+
 from domain.exceptions import AuthenticationError
 from domain.interfaces.services.auth_service import (
     AuthenticatedUser,
@@ -9,7 +11,6 @@ from domain.interfaces.services.auth_service import (
     AuthService,
     AuthTokens,
 )
-from httpx import ASGITransport, AsyncClient
 from interfaces.api.deps import get_auth_service
 from main import create_app
 

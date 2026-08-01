@@ -3,12 +3,13 @@ import io
 
 import pymupdf
 import pytest
+from docx import Document
+
 from application.exceptions import (
     DocumentTextExtractionError,
     NoExtractableTextError,
     UnsupportedDocumentTypeError,
 )
-from docx import Document
 from domain.entities.resume import ResumeMimeType
 from infrastructure.text_extraction.resume_text_extraction_service import (
     ResumeTextExtractionService,

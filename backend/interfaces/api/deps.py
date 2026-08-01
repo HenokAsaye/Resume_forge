@@ -2,6 +2,10 @@ import logging
 from collections.abc import AsyncIterator
 from typing import Annotated
 
+from fastapi import Depends, Header, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from supabase import AsyncClient, Client
+
 from application.exceptions import AIConfigurationError
 from application.interfaces.services.career_ai_services import (
     ATSAnalysisService,
@@ -70,8 +74,6 @@ from domain.interfaces.repositories.job_repository import JobRepository
 from domain.interfaces.repositories.resume_repository import ResumeRepository
 from domain.interfaces.repositories.user_repository import UserRepository
 from domain.interfaces.services.auth_service import AuthenticatedUser, AuthService
-from fastapi import Depends, Header, HTTPException, status
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from infrastructure.ai import (
     AIProviderConfig,
     GeminiStructuredService,
@@ -103,8 +105,6 @@ from infrastructure.file_validation.resume_file_validator import (
     ResumeFileValidationService,
 )
 from infrastructure.text_extraction import ResumeTextExtractionService
-
-from supabase import AsyncClient, Client
 
 security = HTTPBearer(auto_error=False)
 logger = logging.getLogger(__name__)

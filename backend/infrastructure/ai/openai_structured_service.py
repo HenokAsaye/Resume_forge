@@ -1,3 +1,13 @@
+from openai import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    AsyncOpenAI,
+    OpenAIError,
+    RateLimitError,
+)
+from openai import AuthenticationError as OpenAIAuthenticationError
+
 from application.exceptions import (
     LLMAuthenticationError,
     LLMProviderError,
@@ -9,15 +19,6 @@ from application.interfaces.services.structured_generation_service import (
     OutputT,
     StructuredGenerationService,
 )
-from openai import (
-    APIConnectionError,
-    APIStatusError,
-    APITimeoutError,
-    AsyncOpenAI,
-    OpenAIError,
-    RateLimitError,
-)
-from openai import AuthenticationError as OpenAIAuthenticationError
 
 
 class OpenAIStructuredService(StructuredGenerationService):
