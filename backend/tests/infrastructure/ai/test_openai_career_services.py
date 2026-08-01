@@ -14,12 +14,13 @@ from application.dto.career_ai_schema import (
 )
 from application.dto.resume_schema import ResumeDocument
 from application.exceptions import EmptyJobTextError
-from infrastructure.ai.openai_career_services import (
-    OpenAIATSAnalysisService,
-    OpenAICoverLetterGenerationService,
-    OpenAIJobParsingService,
-    OpenAIResumeOptimizationService,
+from application.services import (
+    StructuredATSAnalysisService,
+    StructuredCoverLetterGenerationService,
+    StructuredJobParsingService,
+    StructuredResumeOptimizationService,
 )
+from infrastructure.ai import OpenAIStructuredService
 
 
 def make_resume() -> ResumeDocument:
@@ -91,11 +92,12 @@ def make_client(output: object) -> tuple[AsyncOpenAI, AsyncMock]:
 @pytest.mark.asyncio
 async def test_job_parser_uses_job_schema() -> None:
     client, parse_mock = make_client(make_job())
-    service = OpenAIJobParsingService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredJobParsingService(generator)
 
     result = await service.parse("We need a Python backend engineer")
 
@@ -106,11 +108,12 @@ async def test_job_parser_uses_job_schema() -> None:
 @pytest.mark.asyncio
 async def test_job_parser_rejects_empty_text() -> None:
     client, parse_mock = make_client(make_job())
-    service = OpenAIJobParsingService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredJobParsingService(generator)
 
     with pytest.raises(EmptyJobTextError):
         await service.parse(" ")
@@ -121,11 +124,12 @@ async def test_job_parser_rejects_empty_text() -> None:
 @pytest.mark.asyncio
 async def test_ats_service_returns_score() -> None:
     client, parse_mock = make_client(make_analysis())
-    service = OpenAIATSAnalysisService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredATSAnalysisService(generator)
 
     result = await service.analyze(make_resume(), make_job())
 
@@ -149,11 +153,12 @@ async def test_optimizer_returns_complete_resume_and_changes() -> None:
         ],
     )
     client, parse_mock = make_client(optimization)
-    service = OpenAIResumeOptimizationService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredResumeOptimizationService(generator)
 
     result = await service.optimize(
         make_resume(),
@@ -173,11 +178,12 @@ async def test_cover_letter_service_returns_editable_content() -> None:
         highlights_used=["Python", "FastAPI"],
     )
     client, parse_mock = make_client(cover_letter)
-    service = OpenAICoverLetterGenerationService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredCoverLetterGenerationService(generator)
 
     result = await service.generate(make_resume(), make_job())
 

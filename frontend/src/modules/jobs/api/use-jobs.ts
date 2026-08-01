@@ -51,7 +51,8 @@ export function useParseJob() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: string) => api.post<JobParseResult>(`/api/jobs/${id}/parse`),
+    mutationFn: (id: string) =>
+      api.post<JobParseResult>(`/api/jobs/${id}/parse`, undefined, { ai: true }),
     onSuccess: (result) => {
       queryClient.setQueryData<JobDetail>(jobKeys.detail(result.id), (previous) =>
         previous ? { ...previous, parsed_json: result.parsed_json } : previous

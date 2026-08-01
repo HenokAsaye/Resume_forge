@@ -48,7 +48,7 @@ export function useAnalyzeAts() {
 
   return useMutation({
     mutationFn: (body: AnalyzeAtsRequest) =>
-      api.post<ATSReport>("/api/ats/analyze", body),
+      api.post<ATSReport>("/api/ats/analyze", body, { ai: true }),
     onSuccess: (report) => {
       queryClient.setQueryData(atsKeys.report(report.id), report)
       queryClient.invalidateQueries({ queryKey: atsKeys.all })

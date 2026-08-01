@@ -68,7 +68,8 @@ export function useParseResume() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (id: string) => api.post<Resume>(`/api/resumes/${id}/parse`),
+    mutationFn: (id: string) =>
+      api.post<Resume>(`/api/resumes/${id}/parse`, undefined, { ai: true }),
     onSuccess: (resume) => {
       queryClient.setQueryData(resumeKeys.detail(resume.id), resume)
       queryClient.invalidateQueries({ queryKey: resumeKeys.parsed(resume.id) })

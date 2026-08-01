@@ -52,7 +52,7 @@ export function useCreateCoverLetter() {
 
   return useMutation({
     mutationFn: (body: CreateCoverLetterRequest) =>
-      api.post<CoverLetter>("/api/cover-letters", body),
+      api.post<CoverLetter>("/api/cover-letters", body, { ai: true }),
     onSuccess: (letter) => {
       queryClient.setQueryData(coverLetterKeys.detail(letter.id), letter)
       queryClient.invalidateQueries({ queryKey: coverLetterKeys.all })

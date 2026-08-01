@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+import logging
 from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, status
@@ -22,6 +23,16 @@ from application.interfaces.services.file_validation_service import (
 )
 from application.interfaces.services.resume_export_service import ResumeExportService
 from application.interfaces.services.resume_parsing_service import ResumeParsingService
+from application.interfaces.services.structured_generation_service import (
+    StructuredGenerationService,
+)
+from application.services import (
+    StructuredATSAnalysisService,
+    StructuredCoverLetterGenerationService,
+    StructuredJobParsingService,
+    StructuredResumeOptimizationService,
+    StructuredResumeParsingService,
+)
 from application.use_cases.ats import (
     AnalyzeATSUseCase,
     GetATSReportUseCase,
@@ -53,7 +64,7 @@ from application.use_cases.resume import (
     ParseResumeUseCase,
     UploadResumeUseCase,
 )
-from config import Settings, get_settings
+from config import AIProvider, Settings, get_settings
 from domain.exceptions import AuthenticationError
 from domain.interfaces.repositories.ats_report_repository import ATSReportRepository
 from domain.interfaces.repositories.cover_letter_repository import (
@@ -64,11 +75,9 @@ from domain.interfaces.repositories.resume_repository import ResumeRepository
 from domain.interfaces.repositories.user_repository import UserRepository
 from domain.interfaces.services.auth_service import AuthenticatedUser, AuthService
 from infrastructure.ai import (
-    OpenAIATSAnalysisService,
-    OpenAICoverLetterGenerationService,
-    OpenAIJobParsingService,
-    OpenAIResumeOptimizationService,
-    OpenAIResumeParsingService,
+    AIProviderConfig,
+    GeminiStructuredService,
+    OpenAIStructuredService,
 )
 from infrastructure.auth.supabase_auth_service import SupabaseAuthService
 from infrastructure.database.repositories.supabase_ats_report_repository import (
@@ -98,6 +107,7 @@ from infrastructure.file_validation.resume_file_validator import (
 from infrastructure.text_extraction import ResumeTextExtractionService
 
 security = HTTPBearer(auto_error=False)
+logger = logging.getLogger(__name__)
 
 
 def get_supabase_client(settings: Annotated[Settings, Depends(get_settings)]) -> Client:
@@ -204,54 +214,111 @@ def get_file_validation_service(
     return ResumeFileValidationService(policy)
 
 
-def get_ai_api_key(
+def get_ai_provider_config(
     settings: Annotated[Settings, Depends(get_settings)],
+    request_provider: Annotated[
+        AIProvider | None,
+        Header(alias="X-AI-Provider"),
+    ] = None,
     request_api_key: Annotated[
         str | None,
-        Header(alias="X-OpenAI-API-Key"),
+        Header(alias="X-AI-API-Key"),
     ] = None,
-) -> str:
-    api_key = (request_api_key or settings.openai_api_key).strip()
-    if not api_key:
+) -> AIProviderConfig:
+    normalized_request_key = (request_api_key or "").strip()
+    if request_provider is not None and not normalized_request_key:
         raise AIConfigurationError(
-            "OpenAI is not configured; provide X-OpenAI-API-Key or set OPENAI_API_KEY"
+            "X-AI-Provider requires X-AI-API-Key"
         )
-    return api_key
+
+    if normalized_request_key:
+        config = AIProviderConfig.for_provider(
+            settings,
+            request_provider or AIProvider.GEMINI,
+            normalized_request_key,
+        )
+        credential_source = "request"
+    else:
+        config = AIProviderConfig.from_settings(settings)
+        credential_source = "server"
+
+    if not config.api_key:
+        raise AIConfigurationError(
+            "No AI provider is configured; set GEMINI_API_KEY or "
+            "OPENAI_API_KEY, or provide X-AI-API-Key"
+        )
+    if not config.model:
+        raise AIConfigurationError(
+            f"{config.provider.value.title()} model is not configured; "
+            f"set {config.provider.value.upper()}_MODEL"
+        )
+    logger.info(
+        "AI provider selected: provider=%s credential_source=%s",
+        config.provider.value,
+        credential_source,
+    )
+    return config
+
+
+def get_structured_generation_service(
+    config: Annotated[AIProviderConfig, Depends(get_ai_provider_config)],
+) -> StructuredGenerationService:
+    service_type = (
+        OpenAIStructuredService
+        if config.provider is AIProvider.OPENAI
+        else GeminiStructuredService
+    )
+    return service_type(
+        config.api_key,
+        config.model,
+        max_output_tokens=config.max_output_tokens,
+        timeout_seconds=config.timeout_seconds,
+    )
 
 
 def get_resume_parsing_service(
-    api_key: Annotated[str, Depends(get_ai_api_key)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    generator: Annotated[
+        StructuredGenerationService,
+        Depends(get_structured_generation_service),
+    ],
 ) -> ResumeParsingService:
-    return OpenAIResumeParsingService(api_key, settings.openai_model)
+    return StructuredResumeParsingService(generator)
 
 
 def get_job_parsing_service(
-    api_key: Annotated[str, Depends(get_ai_api_key)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    generator: Annotated[
+        StructuredGenerationService,
+        Depends(get_structured_generation_service),
+    ],
 ) -> JobParsingService:
-    return OpenAIJobParsingService(api_key, settings.openai_model)
+    return StructuredJobParsingService(generator)
 
 
 def get_ats_analysis_service(
-    api_key: Annotated[str, Depends(get_ai_api_key)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    generator: Annotated[
+        StructuredGenerationService,
+        Depends(get_structured_generation_service),
+    ],
 ) -> ATSAnalysisService:
-    return OpenAIATSAnalysisService(api_key, settings.openai_model)
+    return StructuredATSAnalysisService(generator)
 
 
 def get_resume_optimization_service(
-    api_key: Annotated[str, Depends(get_ai_api_key)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    generator: Annotated[
+        StructuredGenerationService,
+        Depends(get_structured_generation_service),
+    ],
 ) -> ResumeOptimizationService:
-    return OpenAIResumeOptimizationService(api_key, settings.openai_model)
+    return StructuredResumeOptimizationService(generator)
 
 
 def get_cover_letter_generation_service(
-    api_key: Annotated[str, Depends(get_ai_api_key)],
-    settings: Annotated[Settings, Depends(get_settings)],
+    generator: Annotated[
+        StructuredGenerationService,
+        Depends(get_structured_generation_service),
+    ],
 ) -> CoverLetterGenerationService:
-    return OpenAICoverLetterGenerationService(api_key, settings.openai_model)
+    return StructuredCoverLetterGenerationService(generator)
 
 
 def get_text_extraction_service() -> DocumentTextExtractionService:

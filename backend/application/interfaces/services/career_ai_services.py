@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Generic, TypeVar
 
 from application.dto.career_ai_schema import (
     ATSAnalysis,
@@ -9,25 +7,7 @@ from application.dto.career_ai_schema import (
     ResumeOptimization,
 )
 from application.dto.resume_schema import ResumeDocument
-
-OutputT = TypeVar("OutputT")
-
-
-@dataclass(frozen=True, slots=True)
-class AIResult(Generic[OutputT]):
-    output: OutputT
-    model: str
-    input_tokens: int
-    output_tokens: int
-    provider_request_id: str | None = None
-
-    def __post_init__(self) -> None:
-        if not self.model.strip():
-            raise ValueError("Model name is required")
-        if self.input_tokens < 0:
-            raise ValueError("Input token count cannot be negative")
-        if self.output_tokens < 0:
-            raise ValueError("Output token count cannot be negative")
+from application.interfaces.services.structured_generation_service import AIResult
 
 
 class JobParsingService(ABC):

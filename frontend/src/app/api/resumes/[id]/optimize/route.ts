@@ -1,4 +1,4 @@
-import { proxyToBackend } from "@/shared/api/server"
+import { forwardAIHeaders, proxyToBackend } from "@/shared/api/server"
 
 type Context = { params: Promise<{ id: string }> }
 
@@ -7,7 +7,9 @@ export async function POST(request: Request, { params }: Context) {
 
   return proxyToBackend(`/api/v1/resumes/${encodeURIComponent(id)}/optimize`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: forwardAIHeaders(request, {
+      "content-type": "application/json",
+    }),
     body: await request.text(),
   })
 }

@@ -1,4 +1,4 @@
-import { proxyToBackend } from "@/shared/api/server"
+import { forwardAIHeaders, proxyToBackend } from "@/shared/api/server"
 
 const FORWARDED_PARAMS = ["resume_id", "job_id"]
 
@@ -21,7 +21,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   return proxyToBackend("/api/v1/cover-letters", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: forwardAIHeaders(request, {
+      "content-type": "application/json",
+    }),
     body: await request.text(),
   })
 }

@@ -39,7 +39,11 @@ export function useOptimizeResume(resumeId: string) {
 
   return useMutation({
     mutationFn: (body: OptimizeRequest) =>
-      api.post<OptimizationResult>(`/api/resumes/${resumeId}/optimize`, body),
+      api.post<OptimizationResult>(
+        `/api/resumes/${resumeId}/optimize`,
+        body,
+        { ai: true }
+      ),
     onSuccess: (result) => {
       queryClient.setQueryData(
         versionKeys.detail(resumeId, result.version.id),

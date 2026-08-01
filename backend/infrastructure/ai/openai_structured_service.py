@@ -1,5 +1,3 @@
-from typing import TypeVar
-
 from openai import (
     APIConnectionError,
     APIStatusError,
@@ -9,20 +7,20 @@ from openai import (
     RateLimitError,
 )
 from openai import AuthenticationError as OpenAIAuthenticationError
-from pydantic import BaseModel
-
 from application.exceptions import (
     LLMAuthenticationError,
     LLMProviderError,
     LLMRateLimitError,
     LLMResponseError,
 )
-from application.interfaces.services.career_ai_services import AIResult
+from application.interfaces.services.structured_generation_service import (
+    AIResult,
+    OutputT,
+    StructuredGenerationService,
+)
 
-OutputT = TypeVar("OutputT", bound=BaseModel)
 
-
-class OpenAIStructuredService:
+class OpenAIStructuredService(StructuredGenerationService):
     def __init__(
         self,
         api_key: str,
@@ -54,7 +52,7 @@ class OpenAIStructuredService:
             max_retries=2,
         )
 
-    async def _generate(
+    async def generate(
         self,
         *,
         instructions: str,

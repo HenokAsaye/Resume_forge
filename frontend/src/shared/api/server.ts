@@ -21,6 +21,24 @@ export class BackendUnreachableError extends Error {
   }
 }
 
+const AI_HEADERS = ["x-ai-provider", "x-ai-api-key"]
+
+export function forwardAIHeaders(
+  request: Request,
+  headers?: HeadersInit
+): Headers {
+  const forwarded = new Headers(headers)
+
+  for (const name of AI_HEADERS) {
+    const value = request.headers.get(name)
+    if (value) {
+      forwarded.set(name, value)
+    }
+  }
+
+  return forwarded
+}
+
 export async function backendFetch(
   path: string,
   init: BackendRequestInit = {}

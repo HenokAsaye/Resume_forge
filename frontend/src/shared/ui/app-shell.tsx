@@ -83,9 +83,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 export function AppShell({
   children,
+  aiAccess,
   userMenu,
 }: {
   children: ReactNode
+  aiAccess?: ReactNode
   userMenu: ReactNode
 }) {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -140,6 +142,7 @@ export function AppShell({
 
             <div className="flex-1" />
 
+            {aiAccess}
             <ThemeToggle />
             {userMenu}
           </div>

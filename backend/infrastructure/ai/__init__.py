@@ -1,19 +1,9 @@
-from .openai_career_services import (
-    OpenAIATSAnalysisService,
-    OpenAICoverLetterGenerationService,
-    OpenAIJobParsingService,
-    OpenAIResumeOptimizationService,
-)
-from .openai_resume_parsing_service import (
-    OpenAIResumeParsingService,
-)
+from .gemini_structured_service import GeminiStructuredService
 from .openai_structured_service import OpenAIStructuredService
+from .provider import AIProviderConfig
 
 __all__ = [
-    "OpenAIATSAnalysisService",
-    "OpenAICoverLetterGenerationService",
-    "OpenAIJobParsingService",
-    "OpenAIResumeOptimizationService",
-    "OpenAIResumeParsingService",
+    "AIProviderConfig",
+    "GeminiStructuredService",
     "OpenAIStructuredService",
 ]

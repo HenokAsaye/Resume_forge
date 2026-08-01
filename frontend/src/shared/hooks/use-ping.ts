@@ -8,6 +8,6 @@ export function usePing() {
     queryKey: ["health"],
     queryFn: () => api.health(),
     retry: 2,
-    staleTime: 30000,
+    staleTime: Infinity,
   })
 }

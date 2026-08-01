@@ -1,7 +1,9 @@
 import { ApiError, apiErrorFromBody, apiErrorFromResponse } from "./errors"
+import { getAIRequestHeaders } from "@/shared/lib/ai-credentials"
 
 export type RequestOptions = {
   signal?: AbortSignal
+  ai?: boolean
 }
 
 export type HealthStatus = {
@@ -16,6 +18,10 @@ async function request<T>(
   options: RequestOptions = {}
 ): Promise<T> {
   const headers: Record<string, string> = {}
+
+  if (options.ai) {
+    Object.assign(headers, getAIRequestHeaders())
+  }
 
   if (body !== undefined) {
     headers["Content-Type"] = "application/json"

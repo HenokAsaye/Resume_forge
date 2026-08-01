@@ -10,9 +10,8 @@ from application.exceptions import (
     EmptyResumeTextError,
     LLMResponseError,
 )
-from infrastructure.ai.openai_resume_parsing_service import (
-    OpenAIResumeParsingService,
-)
+from application.services import StructuredResumeParsingService
+from infrastructure.ai import OpenAIStructuredService
 
 
 def make_resume() -> ResumeDocument:
@@ -63,11 +62,12 @@ async def test_parse_returns_structured_resume_and_usage() -> None:
     )
     client, parse_mock = make_client(response)
 
-    service = OpenAIResumeParsingService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredResumeParsingService(generator)
 
     result = await service.parse("Henok Asaye\nBackend Engineer")
 
@@ -90,11 +90,12 @@ async def test_parse_rejects_empty_text() -> None:
     response = SimpleNamespace()
     client, parse_mock = make_client(response)
 
-    service = OpenAIResumeParsingService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredResumeParsingService(generator)
 
     with pytest.raises(EmptyResumeTextError):
         await service.parse("   ")
@@ -112,11 +113,12 @@ async def test_parse_rejects_missing_structured_output() -> None:
     )
     client, _ = make_client(response)
 
-    service = OpenAIResumeParsingService(
+    generator = OpenAIStructuredService(
         api_key="test-key",
         model="configured-model",
         client=client,
     )
+    service = StructuredResumeParsingService(generator)
 
     with pytest.raises(LLMResponseError):
         await service.parse("Backend engineer resume")

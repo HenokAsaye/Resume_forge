@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
@@ -27,6 +29,8 @@ from domain.exceptions import (
     ResumeVersionConflictError,
     ResumeVersionNotFoundError,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -166,6 +170,13 @@ async def _upstream_error_handler(
     request: Request,
     exc: Exception,
 ) -> JSONResponse:
+    logger.warning(
+        "Upstream failure: method=%s path=%s error=%s detail=%s",
+        request.method,
+        request.url.path,
+        exc.__class__.__name__,
+        str(exc),
+    )
     return _error_response(status.HTTP_502_BAD_GATEWAY, exc)
 
 

@@ -1,7 +1,14 @@
+from enum import Enum
+
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from domain.entities.resume import ResumeMimeType
+
+
+class AIProvider(str, Enum):
+    OPENAI = "openai"
+    GEMINI = "gemini"
 
 
 class Settings(BaseSettings):
@@ -31,8 +38,13 @@ class Settings(BaseSettings):
         ),
     )
 
+    ai_timeout_seconds: float = Field(default=60.0, gt=0)
+    ai_max_output_tokens: int = Field(default=4000, gt=0)
+
     openai_api_key: str = ""
     openai_model: str = "gpt-4o"
+    gemini_api_key: str = ""
+    gemini_model: str = "gemini-2.0-flash"
 
     resume_storage_bucket: str = "resumes"
     resume_max_file_size_bytes: int = Field(default=6 * 1024 * 1024, gt=0)

@@ -21,6 +21,7 @@ from .resume_export_service import (
     ResumeExportService,
 )
 from .resume_parsing_service import ResumeParsingResult, ResumeParsingService
+from .structured_generation_service import StructuredGenerationService
 
 __all__ = [
     "AIResult",
@@ -39,5 +40,6 @@ __all__ = [
     "ResumeParsingResult",
     "ResumeParsingService",
     "StoredFile",
+    "StructuredGenerationService",
     "ValidatedFile",
 ]

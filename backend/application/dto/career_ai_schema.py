@@ -7,7 +7,7 @@ from application.dto.resume_schema import ResumeDocument
 
 class CareerSchemaModel(BaseModel):
     model_config = ConfigDict(
-        extra="forbid",
+        extra="ignore",
         str_strip_whitespace=True,
     )
 
