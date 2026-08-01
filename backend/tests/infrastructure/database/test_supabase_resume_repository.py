@@ -3,8 +3,6 @@ from datetime import UTC, datetime
 from typing import Any
 
 import pytest
-from postgrest.exceptions import APIError
-
 from domain.entities.resume import (
     Resume,
     ResumeMimeType,
@@ -15,6 +13,7 @@ from domain.exceptions import ResumeNotFoundError, ResumeVersionConflictError
 from infrastructure.database.repositories.supabase_resume_repository import (
     SupabaseResumeRepository,
 )
+from postgrest.exceptions import APIError
 
 
 @dataclass

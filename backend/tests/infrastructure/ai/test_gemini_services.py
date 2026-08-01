@@ -2,8 +2,6 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock
 
 import pytest
-from google.genai import errors, types
-
 from application.dto.resume_schema import ResumeDocument
 from application.exceptions import (
     LLMAuthenticationError,
@@ -11,6 +9,7 @@ from application.exceptions import (
     LLMResponseError,
 )
 from application.services import StructuredResumeParsingService
+from google.genai import errors, types
 from infrastructure.ai import GeminiStructuredService
 
 

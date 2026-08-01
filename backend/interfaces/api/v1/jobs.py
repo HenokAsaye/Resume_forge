@@ -1,8 +1,6 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Response, status
-
 from application.dto.career_ai_schema import JobDocument
 from application.dto.career_dto import (
     JobCreateRequest,
@@ -18,6 +16,7 @@ from application.use_cases.jobs import (
     ParseJobUseCase,
 )
 from domain.interfaces.services.auth_service import AuthenticatedUser
+from fastapi import APIRouter, Depends, Response, status
 from interfaces.api.deps import (
     get_create_job_use_case,
     get_current_user,

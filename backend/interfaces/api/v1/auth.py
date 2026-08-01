@@ -1,7 +1,5 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
-
 from application.dto.auth_dto import (
     AuthResponse,
     CurrentUserResponse,
@@ -18,6 +16,7 @@ from domain.interfaces.services.auth_service import (
     AuthenticationResult,
     AuthService,
 )
+from fastapi import APIRouter, Depends, HTTPException, status
 from interfaces.api.deps import get_auth_service, get_current_user
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])

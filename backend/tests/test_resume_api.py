@@ -3,13 +3,12 @@ from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
-from httpx import ASGITransport, AsyncClient
-
 from application.use_cases.resume import ResumeDownload
 from config import Settings, get_settings
 from domain.entities.resume import Resume, ResumeMimeType
 from domain.exceptions import ResumeNotFoundError
 from domain.interfaces.services.auth_service import AuthenticatedUser
+from httpx import ASGITransport, AsyncClient
 from interfaces.api.deps import (
     get_current_user,
     get_delete_resume_use_case,

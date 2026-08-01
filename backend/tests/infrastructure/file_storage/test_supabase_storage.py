@@ -1,11 +1,10 @@
 from typing import Any
 
 import pytest
-from storage3.exceptions import StorageApiError
-
 from application.exceptions import FileStorageError, StoredFileNotFoundError
 from domain.entities.resume import ResumeMimeType
 from infrastructure.file_storage.supabase_storage import SupabaseStorageService
+from storage3.exceptions import StorageApiError
 
 
 class FakeBucket:

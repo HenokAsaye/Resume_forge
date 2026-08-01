@@ -2,7 +2,6 @@ from collections.abc import Callable
 from unittest.mock import Mock
 
 import pytest
-
 from application.exceptions import AIConfigurationError
 from application.interfaces.services.structured_generation_service import (
     StructuredGenerationService,
@@ -21,8 +20,8 @@ from infrastructure.ai import (
 )
 from infrastructure.ai.provider import AIProviderConfig
 from interfaces.api.deps import (
-    get_ats_analysis_service,
     get_ai_provider_config,
+    get_ats_analysis_service,
     get_cover_letter_generation_service,
     get_job_parsing_service,
     get_resume_optimization_service,

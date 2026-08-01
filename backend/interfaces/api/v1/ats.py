@@ -1,8 +1,6 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
-
 from application.dto.career_dto import ATSAnalyzeRequest, ATSReportResponse
 from application.use_cases.ats import (
     AnalyzeATSUseCase,
@@ -10,6 +8,7 @@ from application.use_cases.ats import (
     ListATSReportsUseCase,
 )
 from domain.interfaces.services.auth_service import AuthenticatedUser
+from fastapi import APIRouter, Depends, Query, status
 from interfaces.api.deps import (
     get_analyze_ats_use_case,
     get_ats_report_use_case,

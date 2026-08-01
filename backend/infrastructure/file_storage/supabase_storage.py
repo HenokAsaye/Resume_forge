@@ -1,13 +1,13 @@
-from httpx import HTTPError
-from storage3.exceptions import StorageApiError
-from supabase import AsyncClient
-
 from application.exceptions import FileStorageError, StoredFileNotFoundError
 from application.interfaces.services.file_storage_service import (
     FileStorageService,
     StoredFile,
 )
 from domain.entities.resume import ResumeMimeType
+from httpx import HTTPError
+from storage3.exceptions import StorageApiError
+
+from supabase import AsyncClient
 
 
 class SupabaseStorageService(FileStorageService):

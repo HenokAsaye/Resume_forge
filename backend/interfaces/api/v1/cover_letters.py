@@ -1,8 +1,6 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, Response, status
-
 from application.dto.career_dto import (
     CoverLetterCreateRequest,
     CoverLetterResponse,
@@ -16,6 +14,7 @@ from application.use_cases.cover_letters import (
     UpdateCoverLetterUseCase,
 )
 from domain.interfaces.services.auth_service import AuthenticatedUser
+from fastapi import APIRouter, Depends, Query, Response, status
 from interfaces.api.deps import (
     get_cover_letter_use_case,
     get_create_cover_letter_use_case,

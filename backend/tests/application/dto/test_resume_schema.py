@@ -1,7 +1,6 @@
 import pytest
-from pydantic import ValidationError
-
 from application.dto.resume_schema import ResumeDocument
+from pydantic import ValidationError
 
 
 def make_resume_data() -> dict[str, object]:

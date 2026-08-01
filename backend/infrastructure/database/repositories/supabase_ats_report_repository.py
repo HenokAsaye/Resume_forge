@@ -1,12 +1,12 @@
-from postgrest.exceptions import APIError
-from supabase import AsyncClient
-
 from domain.entities.ats_report import ATSReport
 from domain.exceptions import CareerRepositoryError
 from domain.interfaces.repositories.ats_report_repository import (
     ATSReportRepository,
 )
 from infrastructure.database.mappers.career_mapper import CareerMapper
+from postgrest.exceptions import APIError
+
+from supabase import AsyncClient
 
 
 class SupabaseATSReportRepository(ATSReportRepository):

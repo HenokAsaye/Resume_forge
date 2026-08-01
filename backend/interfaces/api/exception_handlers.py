@@ -1,8 +1,5 @@
 import logging
 
-from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
-
 from application.exceptions import (
     AIConfigurationError,
     DocumentTextExtractionError,
@@ -29,6 +26,8 @@ from domain.exceptions import (
     ResumeVersionConflictError,
     ResumeVersionNotFoundError,
 )
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 

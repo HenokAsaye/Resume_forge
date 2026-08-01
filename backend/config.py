@@ -1,9 +1,8 @@
 from enum import Enum
 
+from domain.entities.resume import ResumeMimeType
 from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from domain.entities.resume import ResumeMimeType
 
 
 class AIProvider(str, Enum):

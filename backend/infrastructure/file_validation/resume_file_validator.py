@@ -4,7 +4,6 @@ import zipfile
 from pathlib import Path
 
 import pymupdf
-
 from application.exceptions import (
     EmptyFileError,
     FileTooLargeError,

@@ -1,10 +1,10 @@
-from postgrest.exceptions import APIError
-from supabase import AsyncClient
-
 from domain.entities.job_description import JobDescription
 from domain.exceptions import CareerRepositoryError
 from domain.interfaces.repositories.job_repository import JobRepository
 from infrastructure.database.mappers.career_mapper import CareerMapper
+from postgrest.exceptions import APIError
+
+from supabase import AsyncClient
 
 
 class SupabaseJobRepository(JobRepository):

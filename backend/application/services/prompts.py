@@ -27,12 +27,12 @@ def load_prompts() -> dict[str, Prompt]:
         raw_prompts = yaml.safe_load(prompt_file)
 
     if not isinstance(raw_prompts, dict):
-        raise ValueError("Prompt catalog must be a YAML mapping")
+        raise TypeError("Prompt catalog must be a YAML mapping")
 
     prompts: dict[str, Prompt] = {}
     for name, value in raw_prompts.items():
         if not isinstance(name, str) or not isinstance(value, dict):
-            raise ValueError("Each prompt must be a named YAML mapping")
+            raise TypeError("Each prompt must be a named YAML mapping")
 
         instructions = value.get("instructions")
         input_template = value.get("input_template")

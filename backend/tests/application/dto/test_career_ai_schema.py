@@ -1,7 +1,6 @@
 import pytest
-from pydantic import ValidationError
-
 from application.dto.career_ai_schema import ATSAnalysis, ResumeChange
+from pydantic import ValidationError
 
 
 def test_ats_score_accepts_zero_to_one_hundred() -> None:

@@ -3,12 +3,11 @@ import io
 
 import pymupdf
 import pytest
-from docx import Document
-
 from application.dto.resume_schema import ResumeDocument
 from application.interfaces.services.resume_export_service import (
     ResumeExportFormat,
 )
+from docx import Document
 from infrastructure.document_export.resume_export_service import (
     ResumeDocumentExportService,
 )

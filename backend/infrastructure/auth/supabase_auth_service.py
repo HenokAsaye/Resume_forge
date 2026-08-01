@@ -2,8 +2,6 @@ from datetime import datetime, timezone
 from typing import Any
 
 from anyio import to_thread
-from supabase import Client
-
 from domain.exceptions import AuthenticationError, RegistrationError
 from domain.interfaces.services.auth_service import (
     AuthenticatedUser,
@@ -11,6 +9,8 @@ from domain.interfaces.services.auth_service import (
     AuthService,
     AuthTokens,
 )
+
+from supabase import Client
 
 try:
     from supabase_auth.errors import AuthApiError

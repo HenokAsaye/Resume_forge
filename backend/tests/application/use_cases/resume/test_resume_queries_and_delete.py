@@ -2,7 +2,6 @@ from datetime import UTC, datetime
 from unittest.mock import AsyncMock
 
 import pytest
-
 from application.exceptions import StoredFileNotFoundError
 from application.use_cases.resume import (
     DeleteResumeUseCase,

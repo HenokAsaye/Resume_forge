@@ -1,7 +1,7 @@
-from supabase import Client
-
 from domain.entities.user import User
 from domain.interfaces.repositories.user_repository import UserRepository
+
+from supabase import Client
 
 
 class SupabaseUserRepository(UserRepository):

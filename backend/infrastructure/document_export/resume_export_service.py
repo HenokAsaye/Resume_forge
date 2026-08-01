@@ -3,15 +3,14 @@ import html
 import io
 import re
 
-from docx import Document
-from weasyprint import HTML
-
 from application.dto.resume_schema import ResumeDocument
 from application.interfaces.services.resume_export_service import (
     ExportedResume,
     ResumeExportFormat,
     ResumeExportService,
 )
+from docx import Document
+from weasyprint import HTML
 
 
 class ResumeDocumentExportService(ResumeExportService):

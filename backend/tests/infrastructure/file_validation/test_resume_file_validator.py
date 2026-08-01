@@ -4,7 +4,6 @@ import zipfile
 
 import pymupdf
 import pytest
-
 from application.exceptions import (
     EmptyFileError,
     FileTooLargeError,
