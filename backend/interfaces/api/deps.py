@@ -227,9 +227,7 @@ def get_ai_provider_config(
 ) -> AIProviderConfig:
     normalized_request_key = (request_api_key or "").strip()
     if request_provider is not None and not normalized_request_key:
-        raise AIConfigurationError(
-            "X-AI-Provider requires X-AI-API-Key"
-        )
+        raise AIConfigurationError("X-AI-Provider requires X-AI-API-Key")
 
     if normalized_request_key:
         config = AIProviderConfig.for_provider(

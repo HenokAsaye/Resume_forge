@@ -113,10 +113,6 @@ class GeminiStructuredService(StructuredGenerationService):
             if response.text:
                 return output_type.model_validate_json(response.text)
         except (ValidationError, ValueError, TypeError) as exc:
-            raise LLMResponseError(
-                "Gemini returned invalid structured output"
-            ) from exc
+            raise LLMResponseError("Gemini returned invalid structured output") from exc
 
-        raise LLMResponseError(
-            "Gemini did not return the required structured output"
-        )
+        raise LLMResponseError("Gemini did not return the required structured output")
